@@ -1,7 +1,6 @@
 // Variables
 let scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
-let mouse, intersects, scoreText, score;
-let sliceLine, isMouseDown, prevMouse, plane;
+let mouse, score, sliceLine, isMouseDown, prevMouse, plane;
 const fruitCount = 8;
 let highScore = 0;
 
@@ -36,6 +35,20 @@ function generateFruits() {
   }
 }
 
+function createSlice() {
+  const lineMaterial = new THREE.LineBasicMaterial({
+    color: 0xffffff,
+    linewidth: 2,
+  });
+  const lineGeometry = new THREE.BufferGeometry();
+  const points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)];
+  lineGeometry.setFromPoints(points);
+  sliceLine = new THREE.Line(lineGeometry, lineMaterial);
+  sliceLine.visible = false;
+  scene.add(sliceLine);
+}
+
+
 function init() {
   // Create the scene
   scene = new THREE.Scene();
@@ -63,16 +76,7 @@ function init() {
   updateScoreText();
 
   // Create slicing line
-  const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0xffffff,
-    linewidth: 2,
-  });
-  const lineGeometry = new THREE.BufferGeometry();
-  const points = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)];
-  lineGeometry.setFromPoints(points);
-  sliceLine = new THREE.Line(lineGeometry, lineMaterial);
-  sliceLine.visible = false;
-  scene.add(sliceLine);
+  createSlice();
 
   // Add the invisible plane in the init function
   const planeGeometry = new THREE.PlaneGeometry(100, 100);
@@ -94,6 +98,7 @@ function init() {
   window.addEventListener('mousemove', onMouseMove, false);
   window.addEventListener('mouseup', onMouseUp, false);
 }
+
 function createLighting() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
@@ -107,11 +112,24 @@ function updateScoreText() {
   document.getElementById("score").innerHTML = `Score: ${score}`;
 }
 
+function updateHighScore() {
+  document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
+}
+
 function onMouseUp(event) {
   event.preventDefault();
 
   isMouseDown = false;
   sliceLine.visible = false;
+}
+
+function onMouseDown(event) {
+  event.preventDefault();
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  checkFruitSlicing();
 }
 
 function onMouseMove(event) {
@@ -173,19 +191,10 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-function onMouseDown(event) {
-    event.preventDefault();
-  
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  
-    checkFruitSlicing();
-  }
-
 
 function checkFruitSlicing() {
     raycaster.setFromCamera(mouse, camera);
-    intersects = raycaster.intersectObjects(container.children);
+    const intersects = raycaster.intersectObjects(container.children);
   
     for (let i = 0; i < intersects.length; i++) {
       const fruit = intersects[i].object;
@@ -209,7 +218,7 @@ function gameOver() {
   if (score > highScore) {
     highScore = score;
   }
-  alert("Game Over! High Score: " + highScore);
+  updateHighScore();
   score = 0;
   updateScoreText();
   for (let i = 0; i < fruits.length; i++) {
