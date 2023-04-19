@@ -8,14 +8,54 @@ let highScore = 0;
 init();
 animate();
 
-function createCamera() {
-  camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(0, 0, 30);
+function generateRandomPosition(min, max){
+  return Math.round(Math.random() * (max - min)) + min;
+}
+
+function loadTextures(scene, params) {
+  TW.loadTextures(["./images/orange.jpg", ],
+      function (textures) {
+          showResult(scene, params, textures);
+      });
+}
+
+function makeMaterials(textures) {
+  var materials = [];
+  for (var i = 0; i < textures.length; i++) {
+      textures[i].flipY = false;
+      textures[i].needsUpdate = true;
+      if (i < 2) {
+          textures[i].repeat.set(2, 2);
+          textures[i].wrapS = THREE.MirroredRepeatWrapping;
+          textures[i].wrapT = THREE.MirroredRepeatWrapping;
+      } else {
+          textures[i].repeat.set(3, 3);
+          textures[i].wrapS = THREE.RepeatWrapping;
+          textures[i].wrapT = THREE.RepeatWrapping;
+      }
+      materials.push(new THREE.MeshPhongMaterial({
+          color: 0xffffff,
+          map: textures[i]
+      }));
+  }
+  return materials;
+}
+
+function createWatermelon() {
+  const watermelon = new THREE.Object3D();
+  const watermelonGeom = new THREE.SphereGeometry(4, 40, 40);
+  const melonTexture = new THREE.TextureLoader().load("./images/watermelon.jpg");
+  melonTexture.repeat.set(2,2);
+  melonTexture.wrapS = THREE.MirroredRepeatWrapping;
+  melonTexture.wrapT = THREE.MirroredRepeatWrapping;
+  melonTexture.needsUpdate = true;
+
+  const melonMaterial = new THREE.MeshPhongMaterial({ map: melonTexture });
+  const melonMesh = new THREE.Mesh(watermelonGeom, melonMaterial);
+  melonMesh.scale.y = 1.5;
+  watermelon.add(melonMesh);
+
+  return watermelon;
 }
 
 // TODO: Pass radius and other dimensions as arguments to avoid magical constants
@@ -23,6 +63,7 @@ function createOrange(radius) {
   const orange = new THREE.Object3D();
 
   const orangeGeometry = new THREE.SphereGeometry(3, 40, 40);
+  // https://storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
   const orangeTexture = new THREE.TextureLoader().load("./images/orange.jpg");
   orangeTexture.repeat.set(2,2);
   orangeTexture.wrapS = THREE.MirroredRepeatWrapping;
@@ -43,21 +84,24 @@ function createOrange(radius) {
   return orange;
 }
 
+function createFruits() {
+  const arr = [];
+  const orange = createOrange();
+  arr.push(orange);
+  const watermelon = createWatermelon();
+  arr.push(watermelon);
+  return arr;
+}
+
 function generateFruits(container) {
-  // Create fruit geometry and material
-  const fruitGeometry = new THREE.SphereGeometry(1, 16, 16);
-  const fruitMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-  const bombMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
-  // Create fruits and add them to the container
+  const arr = createFruits();
   fruits = [];
   fruitLifeSpan = [];
   for (let i = 0; i < fruitCount; i++) {
-    // const material = i % 8 === 0 ? bombMaterial : fruitMaterial;
-    //const fruit = new THREE.Mesh(fruitGeometry, material);
-    const orange = createOrange(); // TODO: Generate other fruit and select randomly from fruit array
-    orange.velocity = new THREE.Vector3();
-    container.add(orange);
-    fruits.push(orange);
+    const fruit = arr[generateRandomPosition(0,1)];
+    fruit.velocity = new THREE.Vector3();
+    container.add(fruit);
+    fruits.push(fruit);
     fruitLifeSpan.push(0);
   }
 }
@@ -65,7 +109,7 @@ function generateFruits(container) {
 function init() {
   // Create the scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color("lavender");
+  scene.background = new THREE.Color("lavender"); // TODO: change
 
   // Create camera
   createCamera();
@@ -102,14 +146,7 @@ function init() {
   window.addEventListener('resize', onWindowResize, false);
 }
 
-function createLighting() {
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  scene.add(ambientLight);
 
-  const pointLight = new THREE.PointLight(0xffffff, .5);
-  pointLight.position.set(25, 50, 25);
-  scene.add(pointLight);
-}
 
 function updateScoreText() {
   document.getElementById("score").innerHTML = `Score: ${score}`;
@@ -214,6 +251,26 @@ function resetFruit(fruit) {
   fruit.visible = true;
 }
 
+// -------- scene utils
+function createCamera() {
+  camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.set(0, 0, 30);
+}
+
+function createLighting() {
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+
+  const pointLight = new THREE.PointLight(0xffffff, .5);
+  pointLight.position.set(25, 50, 25);
+  scene.add(pointLight);
+}
+
 // -------- user interaction
 function onMouseUp(event) {
   event.preventDefault();
@@ -255,3 +312,4 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
+
