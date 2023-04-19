@@ -12,10 +12,10 @@ function generateRandomPosition(min, max){
   return Math.round(Math.random() * (max - min)) + min;
 }
 
-function loadTextures(scene, params) {
-  TW.loadTextures(["./images/orange.jpg", ],
+function loadTextures() {
+  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg"],
       function (textures) {
-          showResult(scene, params, textures);
+          generateFruits(textures);
       });
 }
 
@@ -24,15 +24,9 @@ function makeMaterials(textures) {
   for (var i = 0; i < textures.length; i++) {
       textures[i].flipY = false;
       textures[i].needsUpdate = true;
-      if (i < 2) {
-          textures[i].repeat.set(2, 2);
+      textures[i].repeat.set(2, 2);
           textures[i].wrapS = THREE.MirroredRepeatWrapping;
           textures[i].wrapT = THREE.MirroredRepeatWrapping;
-      } else {
-          textures[i].repeat.set(3, 3);
-          textures[i].wrapS = THREE.RepeatWrapping;
-          textures[i].wrapT = THREE.RepeatWrapping;
-      }
       materials.push(new THREE.MeshPhongMaterial({
           color: 0xffffff,
           map: textures[i]
@@ -41,17 +35,10 @@ function makeMaterials(textures) {
   return materials;
 }
 
-function createWatermelon() {
+function createWatermelon(material) {
   const watermelon = new THREE.Object3D();
   const watermelonGeom = new THREE.SphereGeometry(4, 40, 40);
-  const melonTexture = new THREE.TextureLoader().load("./images/watermelon.jpg");
-  melonTexture.repeat.set(2,2);
-  melonTexture.wrapS = THREE.MirroredRepeatWrapping;
-  melonTexture.wrapT = THREE.MirroredRepeatWrapping;
-  melonTexture.needsUpdate = true;
-
-  const melonMaterial = new THREE.MeshPhongMaterial({ map: melonTexture });
-  const melonMesh = new THREE.Mesh(watermelonGeom, melonMaterial);
+  const melonMesh = new THREE.Mesh(watermelonGeom, material);
   melonMesh.scale.y = 1.5;
   watermelon.add(melonMesh);
 
@@ -59,22 +46,15 @@ function createWatermelon() {
 }
 
 // TODO: Pass radius and other dimensions as arguments to avoid magical constants
-function createOrange(radius) {
+function createOrange(material) {
   const orange = new THREE.Object3D();
 
   const orangeGeometry = new THREE.SphereGeometry(3, 40, 40);
   // https://storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
-  const orangeTexture = new THREE.TextureLoader().load("./images/orange.jpg");
-  orangeTexture.repeat.set(2,2);
-  orangeTexture.wrapS = THREE.MirroredRepeatWrapping;
-  orangeTexture.wrapT = THREE.MirroredRepeatWrapping;
-  orangeTexture.needsUpdate = true;
-
-  const orangeMaterial = new THREE.MeshPhongMaterial({ map: orangeTexture });
-  const orangeMesh = new THREE.Mesh(orangeGeometry, orangeMaterial);
+  const orangeMesh = new THREE.Mesh(orangeGeometry, material);
   orange.add(orangeMesh);
-  // stem
 
+  // stem
   const stemGeom = new THREE.CylinderGeometry(.2, .25, .8);
   const stemMaterial = new THREE.MeshLambertMaterial({color: new THREE.Color("green")});
   const stem = new THREE.Mesh(stemGeom, stemMaterial);
@@ -84,21 +64,15 @@ function createOrange(radius) {
   return orange;
 }
 
-function createFruits() {
-  const arr = [];
-  const orange = createOrange();
-  arr.push(orange);
-  const watermelon = createWatermelon();
-  arr.push(watermelon);
-  return arr;
-}
 
-function generateFruits(container) {
-  const arr = createFruits();
+function generateFruits(textures) {
+  const materials = makeMaterials(textures);
   fruits = [];
   fruitLifeSpan = [];
   for (let i = 0; i < fruitCount; i++) {
-    const fruit = arr[generateRandomPosition(0,1)];
+    const materialIndex = generateRandomPosition(0, 1); // change min and max based on number of fruit types
+    const material = materials[materialIndex];
+    const fruit = materialIndex === 0 ? createOrange(material) : createWatermelon(material);
     fruit.velocity = new THREE.Vector3();
     container.add(fruit);
     fruits.push(fruit);
@@ -123,7 +97,7 @@ function init() {
   container = new THREE.Object3D();
   scene.add(container);
 
-  generateFruits(container);
+  loadTextures();
 
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
