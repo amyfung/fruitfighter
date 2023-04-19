@@ -8,29 +8,29 @@ let highScore = 0;
 init();
 animate();
 
-function generateRandomPosition(min, max){
+function generateRandomPosition(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
 function loadTextures() {
   TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg"],
-      function (textures) {
-          generateFruits(textures);
-      });
+    function (textures) {
+      generateFruits(textures);
+    });
 }
 
 function makeMaterials(textures) {
   var materials = [];
   for (var i = 0; i < textures.length; i++) {
-      textures[i].flipY = false;
-      textures[i].needsUpdate = true;
-      textures[i].repeat.set(2, 2);
-          textures[i].wrapS = THREE.MirroredRepeatWrapping;
-          textures[i].wrapT = THREE.MirroredRepeatWrapping;
-      materials.push(new THREE.MeshPhongMaterial({
-          color: 0xffffff,
-          map: textures[i]
-      }));
+    textures[i].flipY = false;
+    textures[i].needsUpdate = true;
+    textures[i].repeat.set(2, 2);
+    textures[i].wrapS = THREE.MirroredRepeatWrapping;
+    textures[i].wrapT = THREE.MirroredRepeatWrapping;
+    materials.push(new THREE.MeshPhongMaterial({
+      color: 0xffffff,
+      map: textures[i]
+    }));
   }
   return materials;
 }
@@ -56,7 +56,7 @@ function createOrange(material) {
 
   // stem
   const stemGeom = new THREE.CylinderGeometry(.2, .25, .8);
-  const stemMaterial = new THREE.MeshLambertMaterial({color: new THREE.Color("green")});
+  const stemMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color("green") });
   const stem = new THREE.Mesh(stemGeom, stemMaterial);
   stem.position.set(0, 3, 0);
   orange.add(stem);
@@ -64,15 +64,53 @@ function createOrange(material) {
   return orange;
 }
 
+function createBomb() {
+  const bomb = new THREE.Object3D();
+  const bombGeom = new THREE.SphereGeometry(3, 40, 40);
+  const bombMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color("black") })
+  const bombMesh = new THREE.Mesh(bombGeom, bombMaterial);
+  bomb.add(bombMesh);
+
+  const bombTop = new THREE.CylinderGeometry(1, 1, 1, 20);
+  const bombTopMesh = new THREE.Mesh(bombTop, bombMaterial);
+  bombTopMesh.position.set(0, 3, 0);
+  bomb.add(bombTopMesh);
+ 
+  // create detonating cord using Bezier curves and tube geometry 
+  var bezierCurve = new THREE.CubicBezierCurve3(
+    new THREE.Vector3(0,0,0), // bottom, center
+    new THREE.Vector3(-.7,1.1,.23), 
+    new THREE.Vector3(.4,1.3,0), 
+    new THREE.Vector3(.2,1.9,.23)
+ );
+  var geom = new THREE.TubeGeometry(bezierCurve, 32, .1, 10, false);
+  var tube = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({color: THREE.ColorKeywords.grey}));
+
+  tube.position.set(0,3,0);
+  bomb.add(tube);
+
+  bomb.name = "bomb";
+
+  return bomb;
+}
 
 function generateFruits(textures) {
   const materials = makeMaterials(textures);
   fruits = [];
   fruitLifeSpan = [];
+
   for (let i = 0; i < fruitCount; i++) {
-    const materialIndex = generateRandomPosition(0, 1); // change min and max based on number of fruit types
-    const material = materials[materialIndex];
-    const fruit = materialIndex === 0 ? createOrange(material) : createWatermelon(material);
+    var fruit = null;
+    switch(generateRandomPosition(0, 2)) {
+      case 0:
+        fruit = createOrange(materials[0]);
+        break;
+      case 1:
+        fruit = createWatermelon(materials[1]);
+        break;
+      case 2:
+        fruit = createBomb();
+    }
     fruit.velocity = new THREE.Vector3();
     container.add(fruit);
     fruits.push(fruit);
@@ -120,8 +158,6 @@ function init() {
   window.addEventListener('resize', onWindowResize, false);
 }
 
-
-
 function updateScoreText() {
   document.getElementById("score").innerHTML = `Score: ${score}`;
 }
@@ -167,8 +203,14 @@ function checkFruitSlicing() {
     // Remove fruit and update score
     if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the orange mesh)
       fruit.visible = false;
+      if (fruit.name == "bomb") {
+        gameOver();
+        return;
+      }
+
       score++;
       updateScoreText();
+
 
       // Delay fruit respawn
       setTimeout(() => {
@@ -198,7 +240,6 @@ function createTrail() {
 
 
 // TODO - add pausing feature
-
 
 function gameOver() {
   if (score > highScore) {
