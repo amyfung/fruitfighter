@@ -1,6 +1,6 @@
 // TODO: Make params dictionary
 let scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
-let mouse, score, sliceLine, isMouseDown, prevMouse, plane;
+let mouse, score, isMouseDown, prevMouse, plane;
 const fruitCount = 8;
 let highScore = 0;
 
@@ -29,7 +29,7 @@ function createOrange(radius) {
   orangeTexture.wrapT = THREE.MirroredRepeatWrapping;
   orangeTexture.needsUpdate = true;
 
-  const orangeMaterial = new THREE.MeshLambertMaterial({ map: orangeTexture });
+  const orangeMaterial = new THREE.MeshPhongMaterial({ map: orangeTexture });
   const orangeMesh = new THREE.Mesh(orangeGeometry, orangeMaterial);
   orange.add(orangeMesh);
   // stem
