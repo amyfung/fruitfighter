@@ -1,8 +1,9 @@
 // TODO: Make params dictionary
 let scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
 let mouse, score, isMouseDown, prevMouse, plane;
-const fruitCount = 8;
+const fruitCount = 3;
 let highScore = 0;
+let isGameOver = false;
 
 // Initialize game
 init();
@@ -101,7 +102,7 @@ function generateFruits(textures) {
 
   for (let i = 0; i < fruitCount; i++) {
     var fruit = null;
-    switch(generateRandomPosition(0, 2)) {
+    switch(generateRandomPosition(0, materials.length)) {
       case 0:
         fruit = createOrange(materials[0]);
         break;
@@ -141,6 +142,9 @@ function init() {
   mouse = new THREE.Vector2();
   prevMouse = new THREE.Vector2();
 
+  // Hide game over
+  showGameOverMessage(false);
+
   // Initialize score
   score = 0;
   updateScoreText();
@@ -168,7 +172,9 @@ function updateHighScore() {
 
 
 function animate() {
-  requestAnimationFrame(animate);
+  if (!isGameOver) {
+    requestAnimationFrame(animate);
+  } 
 
   // Update fruit positions
   for (let i = 0; i < fruits.length; i++) {
@@ -193,6 +199,7 @@ function animate() {
 
 
 function checkFruitSlicing() {
+  if (isGameOver) return;
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(container.children, true); // Add 'true' to enable recursive search for child objects
 
@@ -241,17 +248,28 @@ function createTrail() {
 
 // TODO - add pausing feature
 
+function showGameOverMessage(visible) {
+  const gameOverDiv = document.getElementById('gameOver');
+  if (visible) {
+    document.getElementById('gameOver').style.visibility = 'visible';
+  } else {
+    document.getElementById('gameOver').style.visibility = 'hidden';
+  }
+}
+
 function gameOver() {
   if (score > highScore) {
     highScore = score;
   }
   updateHighScore();
-  score = 0;
   updateScoreText();
-  for (let i = 0; i < fruits.length; i++) {
+  /* for (let i = 0; i < fruits.length; i++) {
     resetFruit(fruits[i]);
-  }
+  } */
+  showGameOverMessage(true);
+  isGameOver = true;
 }
+
 
 function resetFruit(fruit) {
   fruit.position.x = Math.random() * 20 - 10;
