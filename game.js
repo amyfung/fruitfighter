@@ -14,7 +14,7 @@ function generateRandomPosition(min, max) {
 }
 
 function loadTextures() {
-  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg","./images/banana.jpg","./images/kiwi.jpg","./images/coconut.jpg"],
+  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg","./images/banana.jpg","./images/kiwi.jpg","./images/coconut.jpg"]),
     function (textures) {
       generateFruits(textures);
     });
