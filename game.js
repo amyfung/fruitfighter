@@ -14,7 +14,7 @@ function generateRandomPosition(min, max) {
 }
 
 function loadTextures() {
-  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg"],
+  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg","./images/banana.jpg","./images/kiwi.jpg","./images/coconut.jpg"],
     function (textures) {
       generateFruits(textures);
     });
@@ -65,6 +65,43 @@ function createOrange(material) {
   return orange;
 }
 
+function createApple(material) {
+  const apple = new THREE.Object3D();
+  const appleGeom = new THREE.SphereGeometry(2, 40, 40);
+  const appleMesh = new THREE.Mesh(appleGeom, material);
+  apple.add(appleMesh);
+
+  // stem
+  const applestemGeom = new THREE.CylinderGeometry(.2, .25, .8);
+  const applestemMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color("brown") });
+  const applestem = new THREE.Mesh(applestemGeom, applestemMaterial);
+  stem.position.set(.25, .25, 1);
+  apple.add(applestem);
+
+  // NOTE: add leaf
+
+  return apple;
+}
+
+function createCoconut(material) {
+  const coconut = new THREE.Object3D();
+  const coconutGeom = new THREE.SphereGeometry(2, 40, 4);
+  const coconutMesh = new THREE.Mesh(coconutGeom, material);
+  coconut.add(coconutMesh);
+
+  return coconut;
+}
+
+function createKiwi(material) {
+  const kiwi = new THREE.Object3D();
+  const kiwiGeom = new THREE.SphereGeometry(2, 40, 40);
+  const kiwiMesh = new THREE.Mesh(kiwiGeom, material);
+  kiwiMesh.scale.y = 1.25;
+  kiwi.add(kiwiMesh);
+
+  return kiwi;
+}
+
 function createBomb() {
   const bomb = new THREE.Object3D();
   const bombGeom = new THREE.SphereGeometry(3, 40, 40);
@@ -110,6 +147,15 @@ function generateFruits(textures) {
         fruit = createWatermelon(materials[1]);
         break;
       case 2:
+        fruit = createApple(materials[2]);
+        break;
+      case 3:
+        fruit = createCoconut(materials[3]);
+        break;
+      case 4:
+        fruit = createKiwi(materials[4]);
+        break;
+      case 5:
         fruit = createBomb();
     }
     fruit.velocity = new THREE.Vector3();
@@ -345,4 +391,3 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
-
