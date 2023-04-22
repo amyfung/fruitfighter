@@ -1,6 +1,8 @@
+import Fruit from './fruit.js';
+
 // TODO: Make params dictionary
 let scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
-let mouse, score, isMouseDown, prevMouse, plane;
+let mouse, score, isMouseDown, plane;
 const fruitCount = 3;
 let highScore = 0;
 let isGameOver = false;
@@ -9,7 +11,7 @@ let isGameOver = false;
 init();
 animate();
 
-function generateRandomPosition(min, max) {
+function getRandomNumber(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
@@ -102,7 +104,9 @@ function generateFruits(textures) {
 
   for (let i = 0; i < fruitCount; i++) {
     var fruit = null;
-    switch(generateRandomPosition(0, materials.length)) {
+
+    // randomly choose a fruit or a bomb
+    switch(getRandomNumber(0, materials.length)) {
       case 0:
         fruit = createOrange(materials[0]);
         break;
@@ -111,6 +115,7 @@ function generateFruits(textures) {
         break;
       case 2:
         fruit = createBomb();
+        break;
     }
     fruit.velocity = new THREE.Vector3();
     container.add(fruit);
@@ -122,7 +127,7 @@ function generateFruits(textures) {
 function init() {
   // Create the scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color("lavender"); // TODO: change
+  scene.background = new THREE.Color("white"); // TODO: change
 
   // Create camera
   createCamera();
@@ -140,7 +145,6 @@ function init() {
 
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
-  prevMouse = new THREE.Vector2();
 
   // Hide game over
   showGameOverMessage(false);
@@ -148,23 +152,27 @@ function init() {
   // Initialize score
   score = 0;
   updateScoreText();
-
   // Create lighting
   createLighting();
 
   // Add controls
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
+  //document.getElementById("retry").onclick = retryGame;
   // Add event listeners
   window.addEventListener('mousedown', onMouseDown, false);
   window.addEventListener('mousemove', onMouseMove, false);
   window.addEventListener('mouseup', onMouseUp, false);
   window.addEventListener('resize', onWindowResize, false);
+  animate();
+
+
+  //document.getElementById("retry").addEventListener("click", retryGame, false);
 }
 
 function updateScoreText() {
-  document.getElementById("score").innerHTML = `Score: ${score}`;
+  $("#score").text(`Score: ${this.score}`);
 }
+
 
 function updateHighScore() {
   document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
@@ -227,33 +235,15 @@ function checkFruitSlicing() {
   }
 }
 
-function createTrail() {
-  const trailGeometry = new THREE.Geometry();
-  const trailMaterial = new THREE.LineBasicMaterial({
-    color: 0xffffff,
-    linewidth: 2,
-  });
-
-  trailGeometry.vertices.push(prevMouse.clone());
-  trailGeometry.vertices.push(mouse.clone());
-
-  const trail = new THREE.Line(trailGeometry, trailMaterial);
-  scene.add(trail);
-
-  setTimeout(() => {
-    scene.remove(trail);
-  }, 150);
-}
-
 
 // TODO - add pausing feature
 
 function showGameOverMessage(visible) {
   const gameOverDiv = document.getElementById('gameOver');
   if (visible) {
-    document.getElementById('gameOver').style.visibility = 'visible';
+    gameOverDiv.style.visibility = 'visible';
   } else {
-    document.getElementById('gameOver').style.visibility = 'hidden';
+    gameOverDiv.style.visibility = 'hidden';
   }
 }
 
@@ -268,8 +258,19 @@ function gameOver() {
   } */
   showGameOverMessage(true);
   isGameOver = true;
+  document.getElementById("retry").disabled = false;
 }
 
+function retryGame() {
+  console.log("retrying");
+  isGameOver = false;
+  updateScoreText();
+  showGameOverMessage(false);
+  for (let i = 0; i < fruits.length; i++) {
+    resetFruit(fruits[i]);
+  }
+  animate();
+}
 
 function resetFruit(fruit) {
   fruit.position.x = Math.random() * 20 - 10;
@@ -330,7 +331,6 @@ function onMouseMove(event) {
   } else {
     return;
   }
-  prevMouse.copy(mouse);
 
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;

@@ -4,39 +4,62 @@
 }
 
 body {
-    /* background-image: url('background.jpg'); */
-    background-size: cover;
-    /* background-repeat: no-repeat; */
-    background-position: center center;
-  }
-
-  canvas {
-    position: absolute;
-    display: block;
-    margin: auto;
-    height: 100%;
+  /* background-image: url('background.jpg'); */
+  background-size: cover;
+  /* background-repeat: no-repeat; */
+  background-position: center center;
 }
 
-  #scoreDisplay {
-    position: absolute;
-    font-size: 2em;
-    z-index: 100;
-    width: 100%;
-    font-family: "Gang of Three", Arial, Helvetica, sans-serif;
-  }
+canvas {
+  position: absolute;
+  display: block;
+  margin: auto;
+  height: 100%;
+}
 
-  #score, #highScore {
-    font-family: "Gang of Three", Arial, Helvetica, sans-serif;
-    text-align: 'center';
-  }
+#scoreDisplay {
+  position: absolute;
+  font-size: 2em;
+  z-index: 100;
+  width: 100%;
+  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
+}
 
-  #gameOver {
-    top: 50%;
-    left: 50%;
-    right: 50%;
-    font-size: 2em;
-    font-family: "Gang of Three", Arial, Helvetica, sans-serif; 
-    text-align: center;
-    z-index: 99999999;
-    vertical-align: middle;
-  }
+#score,
+#highScore {
+  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
+  text-align: 'center';
+}
+
+#gameOver {
+  top: 50%;
+  left: 50%;
+  right: 50%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+#gameOverMsg {
+  font-size: 2em;
+  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
+}
+
+.button {
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  opacity: .5;
+  cursor: pointer;
+}
+
+.button:hover {
+  opacity: 1;
+  background-color: #00EEE0;
+  border: 1px #99ccff solid;
+}
+
+.button:active {
+  background-color: #00CCC0;
+  border: 1px #000000 solid;
+}
