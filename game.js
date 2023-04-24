@@ -162,8 +162,9 @@ function generateFruits(textures) {
         fruit = createBomb();
         break;
     }
-    fruit.velocity = new THREE.Vector3();
-    container.add(fruit);
+    fruit.velocity = new THREE.Vector3((Math.random() - 0.5) * 0.2, Math.random() * 0.2 + 0.25 ), (Math.random() - 0.5) * 0.2;
+    
+    //container.add(fruit);
     fruits.push(fruit);
     fruitLifeSpan.push(0);
   }
@@ -238,6 +239,7 @@ function animate() {
   for (let i = 0; i < fruits.length; i++) {
     fruits[i].position.add(fruits[i].velocity);
     fruits[i].velocity.y -= 0.006; // Apply gravity to the fruit's velocity
+    container.add(fruits[i]);
     fruitLifeSpan[i]++;
 
     // Reset fruit position and life span
@@ -276,7 +278,6 @@ function checkFruitSlicing() {
       score++;
       updateScoreText();
 
-
       // Delay fruit respawn
       setTimeout(() => {
         resetFruit(fruit);
@@ -284,7 +285,6 @@ function checkFruitSlicing() {
     }
   }
 }
-
 
 // TODO - add pausing feature
 
@@ -364,11 +364,8 @@ function onMouseUp(event) {
 
 function onMouseDown(event) {
   event.preventDefault();
-
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  checkFruitSlicing();
+  
+  isMouseDown = true;
 }
 
 function onMouseMove(event) {
@@ -386,6 +383,7 @@ function onMouseMove(event) {
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
   //l();
+  //requestAnimationFrame(checkFruitSlicing);
   checkFruitSlicing();
 }
 
