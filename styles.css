@@ -3,10 +3,15 @@
   src: local("./go3v2.tff");
 }
 
+body {
+  padding: 10px;
+}
+
 canvas {
-  position: absolute;
   display: block;
   margin: auto;
+  height: 80%;
+  width: 80%;
 }
 
 #scoreDisplay {

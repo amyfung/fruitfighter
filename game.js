@@ -82,8 +82,8 @@ function loadTextures(callback, params) {
   TW.loadTextures(["./images/orange.jpg", // https://storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
     "./images/watermelon.jpg", // https://thumbs.dreamstime.com/b/watermelon-skin-texture-close-up-watermelon-skin-texture-watermelon-rind-stripes-102872998.jpg
     "./images/apple.jpg",
-    "./images/kiwi.jpg"],
-    //"./images/banana.jpg"],
+    "./images/kiwi.jpg",
+    "./images/banana.jpg"],
     function (textures) {
       generateFruits(params.radius, textures);
       if (callback) {
@@ -127,8 +127,8 @@ function createWatermelon(radius, material) {
   const watermelon = new THREE.Object3D();
   const watermelonGeom = new THREE.SphereGeometry(radius, 40, 40);
   const melonMesh = new THREE.Mesh(watermelonGeom, material);
+  melonMesh.scale.set(1, 1.4, 1);
   watermelon.add(melonMesh);
-  watermelon.scale(1, 1.4, 1);
 
   return watermelon;
 }
@@ -260,8 +260,9 @@ function createKiwi(radius, material) {
   const kiwi = new THREE.Object3D();
   const kiwiGeom = new THREE.SphereGeometry(radius, 40, 40);
   const kiwiMesh = new THREE.Mesh(kiwiGeom, material);
+  kiwiMesh.scale.set(1, 1.25, 1);
   kiwi.add(kiwiMesh);
-  kiwi.scale(1, 1.25, 1);
+  //kiwi.scale.set(1, 1.25, 1);
 
   return kiwi;
 }
@@ -371,9 +372,9 @@ function addFruit(fruits, num, radius, material) {
       fruit = createKiwi(radius / 2, material);
       break;
     case 4:
-      /* fruit = createBanana(material);
+      fruit = createBanana(material);
       break;
-    case 5: */
+    case 5:
       fruit = createBomb(radius * .75);
       break;
   }
