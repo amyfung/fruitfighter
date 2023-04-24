@@ -239,7 +239,7 @@ function generateFruits(radius, textures) {
     if (i < materials.length) {
       createFruit(fruits, i, radius, materials[i]);
     } if (i == materials.length) {
-      createBomb(fruits, i, radius, null)
+      createFruit(fruits, i, radius, null) // bomb does not have texture
     }
   }
 }
