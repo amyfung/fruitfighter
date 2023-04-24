@@ -248,7 +248,7 @@ function createBomb(radius) {
  * @param {*} radius 
  * @param {*} material 
  */
-function createFruit(fruits, num, radius, material){
+function addFruit(fruits, num, radius, material){
   var fruit;
   switch(num) {
     case 0:
@@ -267,8 +267,10 @@ function createFruit(fruits, num, radius, material){
       fruit = createBomb(radius * .75);
       break;
   }
+  fruit.position = new THREE.Vector3(getRandomNumber(window.innerWidth, window.innerHeight), 
+  getRandomNumber(window.innerWidth, window.innerHeight), 
+  getRandomNumber(-10, 10));
   fruit.velocity = new THREE.Vector3(getRandomNumber(-1, 1), getRandomNumber(.35, .6), getRandomNumber(-.1, .5));
-  //container.add(fruit);
   fruits.push(fruit);
   fruitLifeSpan.push(0);
 }
@@ -279,9 +281,9 @@ function generateFruits(radius, textures) {
   fruitLifeSpan = [];
   for (let i = 0; i <= materials.length; i++) {
     if (i < materials.length) {
-      createFruit(fruits, i, radius, materials[i]);
+      addFruit(fruits, i, radius, materials[i]);
     } if (i == materials.length) {
-      createFruit(fruits, i, radius, null) // bomb does not have texture
+      addFruit(fruits, i, radius, null) // bomb does not have texture
     }
   }
 }
@@ -294,6 +296,7 @@ function animate() {
 
   // Update fruit positions
   for (let i = 0; i < params.fruitCount; i++) {
+    // Generate number to select a fruit or bomb randomly
     var num = getRandomNumber(0, fruits.length - 1);
     var fruit = fruits[num];
     fruit.position.add(fruits[num].velocity);
