@@ -1,4 +1,3 @@
-
 let params, scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
 let mouse, score, highScore, isMouseDown;
 const fruitCount = 3;
@@ -109,6 +108,14 @@ function makeMaterials(textures) {
   return materials;
 }
 
+/**
+ * Given a radius dimension and texture material, creates a parent object
+ * and a watermelon mesh before scaling the mesh and adding it to the parent
+ * object.
+ * @param {*} radius 
+ * @param {*} material 
+ * @returns 
+ */
 function createWatermelon(radius, material) {
   const watermelon = new THREE.Object3D();
   const watermelonGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -120,6 +127,12 @@ function createWatermelon(radius, material) {
 }
 
 // TODO: Pass radius and other dimensions as arguments to avoid magical constants
+/**
+ * 
+ * @param {*} radius 
+ * @param {*} material 
+ * @returns 
+ */
 function createOrange(radius, material) {
   const orange = new THREE.Object3D();
 
@@ -138,6 +151,12 @@ function createOrange(radius, material) {
   return orange;
 }
 
+/**
+ * 
+ * @param {*} radius 
+ * @param {*} material 
+ * @returns 
+ */
 function createApple(radius, material) {
   const apple = new THREE.Object3D();
   const appleGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -156,6 +175,11 @@ function createApple(radius, material) {
   return apple;
 }
 
+/**
+ * 
+ * @param {*} material 
+ * @returns 
+ */
 function createCoconut(material) {
   const coconut = new THREE.Object3D();
   const coconutGeom = new THREE.SphereGeometry(2, 40, 4);
@@ -165,6 +189,12 @@ function createCoconut(material) {
   return coconut;
 }
 
+/**
+ * 
+ * @param {*} radius 
+ * @param {*} material 
+ * @returns 
+ */
 function createKiwi(radius, material) {
   const kiwi = new THREE.Object3D();
   const kiwiGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -175,6 +205,11 @@ function createKiwi(radius, material) {
   return kiwi;
 }
 
+/**
+ * 
+ * @param {*} radius 
+ * @returns 
+ */
 function createBomb(radius) {
   const bomb = new THREE.Object3D();
   const bombGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -206,6 +241,13 @@ function createBomb(radius) {
 }
 
 // -------- Fruit animation
+/**
+ * Given a number, generates a fruit or bomb and pushe sit 
+ * @param {*} fruits 
+ * @param {*} num 
+ * @param {*} radius 
+ * @param {*} material 
+ */
 function createFruit(fruits, num, radius, material){
   var fruit;
   switch(num) {
@@ -225,7 +267,7 @@ function createFruit(fruits, num, radius, material){
       fruit = createBomb(radius * .75);
       break;
   }
-  fruit.velocity = new THREE.Vector3((Math.random() - 0.5) * 0.2, Math.random() * 0.2 + 0.25 ), (Math.random() - 0.5) * 0.2;
+  fruit.velocity = new THREE.Vector3(getRandomNumber(-1, 1), getRandomNumber(.35, .6), getRandomNumber(-.1, .5));
   //container.add(fruit);
   fruits.push(fruit);
   fruitLifeSpan.push(0);
@@ -243,7 +285,6 @@ function generateFruits(radius, textures) {
     }
   }
 }
-
 
 
 function animate() {
