@@ -229,6 +229,8 @@ function createBanana(material) {
   return banana;
 }
 
+// NOTE: Not being used for HWK6 - haven't adding slicing animation, and coconut
+// looks similar to kiwi externally
 /**
  * Given a radius dimension and texture material, creates a parent object and a
  * coconut mesh before adding the coconut mesh to the parent object.
