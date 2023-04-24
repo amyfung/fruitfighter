@@ -1,6 +1,5 @@
-// test
 let scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
-let mouse, score, isMouseDown, plane;
+let mouse, score, isMouseDown;
 const fruitCount = 3;
 let highScore = 0;
 let isGameOver = false;
@@ -9,10 +8,56 @@ let isGameOver = false;
 init();
 //animate();
 
+function init() {
+  loadTextures();
+
+  // -- Initialize main global variables
+  // Create scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color("white"); // TODO: change
+
+  // Create camera
+  createCamera();
+
+  // Create container
+  container = new THREE.Object3D();
+  scene.add(container);
+
+  // Initializing raycaster and mouse
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  // Hide game over components
+  showGameOver(false);
+
+  // Initialize score
+  score = 0;
+  updateScoreText();
+  
+  // Create and add lighting
+  createLighting();
+  
+  renderer = new THREE.WebGLRenderer();
+  TW.mainInit(renderer, scene);
+
+  // Add controls
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  //document.getElementById("retry").onclick = retryGame;
+  // Add event listeners
+  window.addEventListener('mousedown', onMouseDown, false);
+  window.addEventListener('mousemove', onMouseMove, false);
+  window.addEventListener('mouseup', onMouseUp, false);
+  window.addEventListener('resize', onWindowResize, false);
+  //document.getElementById("retry").addEventListener("click", retryGame, false);
+}
+
 function getRandomNumber(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
+
+// -------- Create fruit models
 function loadTextures() {
   TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg", "./images/kiwi.jpg","./images/coconut.jpg"],
     function (textures) {
@@ -133,6 +178,7 @@ function createBomb() {
   return bomb;
 }
 
+// -------- Fruit animation
 function generateFruits(textures) {
   const materials = makeMaterials(textures);
   fruits = [];
@@ -170,66 +216,6 @@ function generateFruits(textures) {
   }
 }
 
-function init() {
-  loadTextures();
-
-  // Create the scene
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color("white"); // TODO: change
-
-  // Create camera
-  createCamera();
-
-
-  // Create renderer
-  //renderer = new THREE.WebGLRenderer({ antialias: true });
-  //renderer.setSize(window.innerWidth, window.innerHeight);
-  //document.body.appendChild(renderer.domElement);
-
-  // Create container
-  container = new THREE.Object3D();
-  scene.add(container);
-
-
-  raycaster = new THREE.Raycaster();
-  mouse = new THREE.Vector2();
-
-
-  // Hide game over
-  showGameOverMessage(false);
-
-  // Initialize score
-  score = 0;
-  updateScoreText();
-  
-  // Create lighting
-  createLighting();
-  
-  renderer = new THREE.WebGLRenderer();
-  TW.mainInit(renderer, scene);
-
-  // Add controls
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-  //document.getElementById("retry").onclick = retryGame;
-  // Add event listeners
-  window.addEventListener('mousedown', onMouseDown, false);
-  window.addEventListener('mousemove', onMouseMove, false);
-  window.addEventListener('mouseup', onMouseUp, false);
-  window.addEventListener('resize', onWindowResize, false);
-  //document.getElementById("retry").addEventListener("click", retryGame, false);
-}
-
-function updateScoreText() {
-  document.getElementById("score").innerHTML = `Score: ${score}`;
-}
-
-
-function updateHighScore() {
-  document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
-}
-
-
 function animate() {
   if (!isGameOver) {
     requestAnimationFrame(animate);
@@ -256,7 +242,6 @@ function animate() {
 
   renderer.render(scene, camera);
 }
-
 
 function checkFruitSlicing() {
   if (isGameOver) return;
@@ -286,42 +271,6 @@ function checkFruitSlicing() {
   }
 }
 
-// TODO - add pausing feature
-
-function showGameOverMessage(visible) {
-  const gameOverDiv = document.getElementById('gameOver');
-  if (visible) {
-    document.getElementById('gameOver').style.visibility = 'visible';
-  } else {
-    document.getElementById('gameOver').style.visibility = 'hidden';
-  }
-}
-
-function gameOver() {
-  if (score > highScore) {
-    highScore = score;
-  }
-  updateHighScore();
-  updateScoreText();
-  /* for (let i = 0; i < fruits.length; i++) {
-    resetFruit(fruits[i]);
-  } */
-  showGameOverMessage(true);
-  isGameOver = true;
-  //document.getElementById("retry").disabled = false;
-}
-
-function retryGame() {
-  console.log("retrying");
-  isGameOver = false;
-  updateScoreText();
-  showGameOverMessage(false);
-  for (let i = 0; i < fruits.length; i++) {
-    resetFruit(fruits[i]);
-  }
-  animate();
-}
-
 function resetFruit(fruit) {
   fruit.position.x = Math.random() * 20 - 10;
   fruit.position.y = -5; // Change the initial y position to be below the screen
@@ -333,6 +282,50 @@ function resetFruit(fruit) {
   fruit.velocity.z = (Math.random() - 0.5) * 0.2;
 
   fruit.visible = true;
+}
+
+// -------- Score
+function updateScoreText() {
+  document.getElementById("score").innerHTML = `Score: ${score}`;
+}
+
+function updateHighScore() {
+  document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
+}
+
+// -------- Game over
+function showGameOver(visible) {
+  const gameOverDiv = document.getElementById('gameOver');
+  if (visible) {
+    console.log("Showing game over msg")
+    gameOverDiv.style.visibility = 'visible';
+  } else {
+    console.log("Hiding game over msg")
+    gameOverDiv.style.visibility = 'hidden';
+  }
+}
+
+function gameOver() {
+  if (score > highScore) {
+    highScore = score;
+  }
+  updateHighScore();
+  updateScoreText();
+  
+  showGameOver(true);
+  isGameOver = true;
+  //document.getElementById("retry").disabled = false;
+}
+
+function retryGame() {
+  console.log("Retrying");
+  isGameOver = false;
+  updateScoreText();
+  showGameOver(false);
+  for (let i = 0; i < fruits.length; i++) {
+    resetFruit(fruits[i]);
+  }
+  animate();
 }
 
 // -------- scene utils
@@ -358,20 +351,18 @@ function createLighting() {
 // -------- user interaction
 function onMouseUp(event) {
   event.preventDefault();
-
   isMouseDown = false;;
 }
 
 function onMouseDown(event) {
   event.preventDefault();
-  
   isMouseDown = true;
 }
 
 function onMouseMove(event) {
   event.preventDefault();
   if (event.target == renderer.domElement) {
-    // use canvas offset to determine mouse coordinates in canvas coordinate frame
+    // Use canvas offset to determine mouse coordinates in canvas coordinate frame
     var rect = event.target.getBoundingClientRect();
     var canvasX = event.clientX - rect.left;
     var canvasY = event.clientY - rect.top;
@@ -382,8 +373,6 @@ function onMouseMove(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  //l();
-  //requestAnimationFrame(checkFruitSlicing);
   checkFruitSlicing();
 }
 
