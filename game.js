@@ -127,8 +127,8 @@ function createWatermelon(radius, material) {
   const watermelon = new THREE.Object3D();
   const watermelonGeom = new THREE.SphereGeometry(radius, 40, 40);
   const melonMesh = new THREE.Mesh(watermelonGeom, material);
-  melonMesh.scale.y = 1.4;
   watermelon.add(melonMesh);
+  watermelon.scale(1, 1.4, 1);
 
   return watermelon;
 }
@@ -260,8 +260,8 @@ function createKiwi(radius, material) {
   const kiwi = new THREE.Object3D();
   const kiwiGeom = new THREE.SphereGeometry(radius, 40, 40);
   const kiwiMesh = new THREE.Mesh(kiwiGeom, material);
-  kiwiMesh.scale.y = 1.25;
   kiwi.add(kiwiMesh);
+  kiwi.scale(1, 1.25, 1);
 
   return kiwi;
 }
