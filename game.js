@@ -1,7 +1,7 @@
-let scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
-let mouse, score, isMouseDown;
+
+let params, scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
+let mouse, score, highScore, isMouseDown;
 const fruitCount = 3;
-let highScore = 0;
 let isGameOver = false;
 
 // Initialize game
@@ -9,33 +9,43 @@ init();
 //animate();
 
 function init() {
-  loadTextures();
+  params = {
+    radius: 4,
+    fruitCount: 3,
+  }
 
   // -- Initialize main global variables
   // Create scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color("white"); // TODO: change
 
-  // Create camera
-  createCamera();
-
   // Create container
   container = new THREE.Object3D();
   scene.add(container);
+
+  // Load textures and generate fruits
+  loadTextures((params) => {
+    // Call animate() function after the fruits have been generated
+    animate();
+  }, params);
+
+  // Create camera
+  createCamera();
 
   // Initializing raycaster and mouse
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
 
   // Hide game over components
-  //showGameOver(false);
+  showGameOver(false);
 
   // Initialize score
   score = 0;
+  highScore = 0;
   updateScoreText();
   
   // Create and add lighting
-  createLighting();
+  createLighting(scene);
   
   renderer = new THREE.WebGLRenderer();
   document.body.appendChild(renderer.domElement);
@@ -43,7 +53,6 @@ function init() {
 
   // Add controls
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
 
   // Add event listeners
   renderer.domElement.addEventListener('mousedown', onMouseDown, false);
@@ -57,20 +66,33 @@ function init() {
       el.attachEvent('onclick', retryGame);
 }
 
+/**
+ * 
+ * @param {*} min 
+ * @param {*} max 
+ * @returns 
+ */
 function getRandomNumber(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
 
 // -------- Create fruit models
-function loadTextures() {
-  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg", "./images/kiwi.jpg","./images/coconut.jpg"],
+function loadTextures(callback, params) {
+  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg", "./images/kiwi.jpg"],
     function (textures) {
-      generateFruits(textures);
-      animate();
+      generateFruits(params.radius, textures);
+      if (callback) {
+        callback();
+      }
     });
 }
 
+/**
+ * 
+ * @param {*} textures 
+ * @returns 
+ */
 function makeMaterials(textures) {
   var materials = [];
   for (var i = 0; i < textures.length; i++) {
@@ -87,9 +109,9 @@ function makeMaterials(textures) {
   return materials;
 }
 
-function createWatermelon(material) {
+function createWatermelon(radius, material) {
   const watermelon = new THREE.Object3D();
-  const watermelonGeom = new THREE.SphereGeometry(4, 40, 40);
+  const watermelonGeom = new THREE.SphereGeometry(radius, 40, 40);
   const melonMesh = new THREE.Mesh(watermelonGeom, material);
   melonMesh.scale.y = 1.4;
   watermelon.add(melonMesh);
@@ -98,16 +120,16 @@ function createWatermelon(material) {
 }
 
 // TODO: Pass radius and other dimensions as arguments to avoid magical constants
-function createOrange(material) {
+function createOrange(radius, material) {
   const orange = new THREE.Object3D();
 
-  const orangeGeometry = new THREE.SphereGeometry(3, 40, 40);
+  const orangeGeometry = new THREE.SphereGeometry(radius, 40, 40);
   // https://storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
   const orangeMesh = new THREE.Mesh(orangeGeometry, material);
   orange.add(orangeMesh);
 
   // stem
-  const stemGeom = new THREE.CylinderGeometry(.2, .25, .8);
+  const stemGeom = new THREE.CylinderGeometry(radius / 20, .25, .8);
   const stemMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color("green") });
   const stem = new THREE.Mesh(stemGeom, stemMaterial);
   stem.position.set(0, 3, 0);
@@ -116,9 +138,9 @@ function createOrange(material) {
   return orange;
 }
 
-function createApple(material) {
+function createApple(radius, material) {
   const apple = new THREE.Object3D();
-  const appleGeom = new THREE.SphereGeometry(2, 40, 40);
+  const appleGeom = new THREE.SphereGeometry(radius, 40, 40);
   const appleMesh = new THREE.Mesh(appleGeom, material);
   apple.add(appleMesh);
 
@@ -143,9 +165,9 @@ function createCoconut(material) {
   return coconut;
 }
 
-function createKiwi(material) {
+function createKiwi(radius, material) {
   const kiwi = new THREE.Object3D();
-  const kiwiGeom = new THREE.SphereGeometry(2, 40, 40);
+  const kiwiGeom = new THREE.SphereGeometry(radius, 40, 40);
   const kiwiMesh = new THREE.Mesh(kiwiGeom, material);
   kiwiMesh.scale.y = 1.25;
   kiwi.add(kiwiMesh);
@@ -153,9 +175,9 @@ function createKiwi(material) {
   return kiwi;
 }
 
-function createBomb() {
+function createBomb(radius) {
   const bomb = new THREE.Object3D();
-  const bombGeom = new THREE.SphereGeometry(3, 40, 40);
+  const bombGeom = new THREE.SphereGeometry(radius, 40, 40);
   const bombMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color("black") })
   const bombMesh = new THREE.Mesh(bombGeom, bombMaterial);
   bomb.add(bombMesh);
@@ -184,42 +206,45 @@ function createBomb() {
 }
 
 // -------- Fruit animation
-function generateFruits(textures) {
+function createFruit(fruits, num, radius, material){
+  var fruit;
+  switch(num) {
+    case 0:
+      fruit = createOrange(radius, material);
+      break;
+    case 1:
+      fruit = createWatermelon(radius * 2, material);
+      break;
+    case 2:
+      fruit = createApple(radius, material);
+      break;
+    case 3:
+      fruit = createKiwi(radius / 2, material);
+      break;
+    case 4:
+      fruit = createBomb(radius * .75);
+      break;
+  }
+  fruit.velocity = new THREE.Vector3((Math.random() - 0.5) * 0.2, Math.random() * 0.2 + 0.25 ), (Math.random() - 0.5) * 0.2;
+  //container.add(fruit);
+  fruits.push(fruit);
+  fruitLifeSpan.push(0);
+}
+
+function generateFruits(radius, textures) {
   const materials = makeMaterials(textures);
   fruits = [];
   fruitLifeSpan = [];
-
-  for (let i = 0; i < fruitCount; i++) {
-    var fruit = null;
-
-    // randomly choose a fruit or a bomb
-    switch(getRandomNumber(4, materials.length)) {
-      case 0:
-        fruit = createOrange(materials[0]);
-        break;
-      case 1:
-        fruit = createWatermelon(materials[1]);
-        break;
-      case 2:
-        fruit = createApple(materials[2]);
-        break;
-      case 3:
-        fruit = createKiwi(materials[3]);
-        break;
-      case 4:
-        fruit = createCoconut(materials[4]);
-        break;
-      case 5:
-        fruit = createBomb();
-        break;
+  for (let i = 0; i <= materials.length; i++) {
+    if (i < materials.length) {
+      createFruit(fruits, i, radius, materials[i]);
+    } if (i == materials.length) {
+      createBomb(fruits, i, radius, null)
     }
-    fruit.velocity = new THREE.Vector3((Math.random() - 0.5) * 0.2, Math.random() * 0.2 + 0.25 ), (Math.random() - 0.5) * 0.2;
-    
-    //container.add(fruit);
-    fruits.push(fruit);
-    fruitLifeSpan.push(0);
   }
 }
+
+
 
 function animate() {
   if (!isGameOver) {
@@ -227,22 +252,24 @@ function animate() {
   } 
 
   // Update fruit positions
-  for (let i = 0; i < fruits.length; i++) {
-    fruits[i].position.add(fruits[i].velocity);
-    fruits[i].velocity.y -= 0.006; // Apply gravity to the fruit's velocity
-    container.add(fruits[i]);
-    fruitLifeSpan[i]++;
+  for (let i = 0; i < params.fruitCount; i++) {
+    var num = getRandomNumber(0, fruits.length - 1);
+    var fruit = fruits[num];
+    fruit.position.add(fruits[num].velocity);
+    fruit.velocity.y -= 0.006; // Apply gravity to the fruit's velocity
+    container.add(fruit);
+    fruitLifeSpan[num]++;
 
     // Reset fruit position and life span
-    if (fruitLifeSpan[i] > 300) {
-      resetFruit(fruits[i]);
-      fruitLifeSpan[i] = 0;
+    if (fruitLifeSpan[num] > 300) {
+      resetFruit(fruits[num]);
+      fruitLifeSpan[num] = 0;
     }
   }
 
   for (let i = 0; i < fruits.length; i++) {
-    fruits[i].rotation.x += 0.02;
-    fruits[i].rotation.y += 0.02;
+    fruits[num].rotation.x += 0.02;
+    fruits[num].rotation.y += 0.02;
   }
 
   renderer.render(scene, camera);
@@ -336,7 +363,7 @@ function retryGame() {
 // -------- scene utils
 function createCamera() {
   camera = new THREE.PerspectiveCamera(
-    75,
+    100,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -344,7 +371,7 @@ function createCamera() {
   camera.position.set(0, 0, 30);
 }
 
-function createLighting() {
+function createLighting(scene) {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
 
