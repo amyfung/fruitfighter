@@ -1,6 +1,4 @@
-import Fruit from './fruit.js';
-
-// TODO: Make params dictionary
+// test
 let scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
 let mouse, score, isMouseDown, plane;
 const fruitCount = 3;
@@ -9,16 +7,17 @@ let isGameOver = false;
 
 // Initialize game
 init();
-animate();
+//animate();
 
 function getRandomNumber(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
 function loadTextures() {
-  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg","./images/banana.jpg","./images/kiwi.jpg","./images/coconut.jpg"],
+  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg", "./images/kiwi.jpg","./images/coconut.jpg"],
     function (textures) {
       generateFruits(textures);
+      animate();
     });
 }
 
@@ -42,7 +41,7 @@ function createWatermelon(material) {
   const watermelon = new THREE.Object3D();
   const watermelonGeom = new THREE.SphereGeometry(4, 40, 40);
   const melonMesh = new THREE.Mesh(watermelonGeom, material);
-  melonMesh.scale.y = 1.5;
+  melonMesh.scale.y = 1.4;
   watermelon.add(melonMesh);
 
   return watermelon;
@@ -74,11 +73,11 @@ function createApple(material) {
   apple.add(appleMesh);
 
   // stem
-  const applestemGeom = new THREE.CylinderGeometry(.2, .25, .8);
-  const applestemMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color("brown") });
-  const applestem = new THREE.Mesh(applestemGeom, applestemMaterial);
-  stem.position.set(.25, .25, 1);
-  apple.add(applestem);
+  const appleStemGeom = new THREE.CylinderGeometry(.2, .25, .8);
+  const appleStemMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color("brown") });
+  const appleStem = new THREE.Mesh(appleStemGeom, appleStemMaterial);
+  appleStem.position.set(.25, .25, 1);
+  apple.add(appleStem);
 
   // NOTE: add leaf
 
@@ -154,10 +153,10 @@ function generateFruits(textures) {
         fruit = createApple(materials[2]);
         break;
       case 3:
-        fruit = createCoconut(materials[3]);
+        fruit = createKiwi(materials[3]);
         break;
       case 4:
-        fruit = createKiwi(materials[4]);
+        fruit = createCoconut(materials[4]);
         break;
       case 5:
         fruit = createBomb();
@@ -171,6 +170,8 @@ function generateFruits(textures) {
 }
 
 function init() {
+  loadTextures();
+
   // Create the scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color("white"); // TODO: change
@@ -178,19 +179,20 @@ function init() {
   // Create camera
   createCamera();
 
+
   // Create renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+  //renderer = new THREE.WebGLRenderer({ antialias: true });
+  //renderer.setSize(window.innerWidth, window.innerHeight);
+  //document.body.appendChild(renderer.domElement);
 
   // Create container
   container = new THREE.Object3D();
   scene.add(container);
 
-  loadTextures();
 
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
+
 
   // Hide game over
   showGameOverMessage(false);
@@ -198,25 +200,27 @@ function init() {
   // Initialize score
   score = 0;
   updateScoreText();
+  
   // Create lighting
   createLighting();
+  
+  renderer = new THREE.WebGLRenderer();
+  TW.mainInit(renderer, scene);
 
   // Add controls
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
   //document.getElementById("retry").onclick = retryGame;
   // Add event listeners
   window.addEventListener('mousedown', onMouseDown, false);
   window.addEventListener('mousemove', onMouseMove, false);
   window.addEventListener('mouseup', onMouseUp, false);
   window.addEventListener('resize', onWindowResize, false);
-  animate();
-
-
   //document.getElementById("retry").addEventListener("click", retryGame, false);
 }
 
 function updateScoreText() {
-  $("#score").text(`Score: ${this.score}`);
+  document.getElementById("score").innerHTML = `Score: ${score}`;
 }
 
 
@@ -287,9 +291,9 @@ function checkFruitSlicing() {
 function showGameOverMessage(visible) {
   const gameOverDiv = document.getElementById('gameOver');
   if (visible) {
-    gameOverDiv.style.visibility = 'visible';
+    document.getElementById('gameOver').style.visibility = 'visible';
   } else {
-    gameOverDiv.style.visibility = 'hidden';
+    document.getElementById('gameOver').style.visibility = 'hidden';
   }
 }
 
@@ -304,7 +308,7 @@ function gameOver() {
   } */
   showGameOverMessage(true);
   isGameOver = true;
-  document.getElementById("retry").disabled = false;
+  //document.getElementById("retry").disabled = false;
 }
 
 function retryGame() {
@@ -381,7 +385,7 @@ function onMouseMove(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  createTrail();
+  //l();
   checkFruitSlicing();
 }
 

@@ -1,25 +1,11 @@
 <!DOCTYPE html>
-
  <html lang="en">
     <head>
+        <title>Fruit Ninja</title>
         <meta charset="UTF-8">
         <meta name="viewport" content=
               "width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="./styles.css">
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r95.all.js">
-            "https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"
-        </script>
-        <script src="https://cs.wellesley.edu/~cs307/threejs/libs/tw-sp21.js">
-            "https://cs.wellesley.edu/~cs307/threejs/libs/tw-fa18.js"
-        </script>
-        <script src="https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r95.js">
-            "https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r80.js"
-        </script>
-        <script src="https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r95.js">
-            "https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r80.min.js"
-        </script>
-        <script src="./game.js"></script>
     </head>
  <body>
     <div id="scoreDisplay">
@@ -28,8 +14,22 @@
     </div>
     <div id="gameOver">
         <div id="gameOverMsg">Game Over</div>
-        <input id="retry" type="button" value="Retry" onclick="retryGame()"/>
-        <!-- <button class="button" id="retry" value="Retry">Retry</button> -->
+        <input id="retry" type="button" value="Retry" onclick="retryGame()"/> 
     </div>
+    </div>
+    <div id="gameOver">Game Over</div>
+     <script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r95.all.js">
+         "https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"
+     </script>
+     <script src="https://cs.wellesley.edu/~cs307/threejs/libs/tw-sp21.js">
+         "https://cs.wellesley.edu/~cs307/threejs/libs/tw-fa18.js"
+     </script>
+     <script src="https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r95.js">
+         "https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r80.js"
+     </script>
+     <script src="https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r95.js">
+         "https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r80.min.js"
+     </script>
+     <script src="./game.js"></script>
  </body>
  </html>
