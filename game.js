@@ -1,16 +1,14 @@
-let params, scene, camera, renderer, fruits, fruitLifeSpan, container, raycaster;
+let scene, camera, renderer, fruits, container, raycaster;
 let mouse, score, highScore, isMouseDown;
-const fruitCount = 3;
-let isGameOver = false;
+let stopped = false;
 
 // Initialize game
 init();
-//animate();
 
 function init() {
-  params = {
+  let params = {
     radius: 4,
-    fruitCount: 3,
+    fruitCount: 5,
   }
 
   // -- Initialize main global variables
@@ -25,7 +23,7 @@ function init() {
   // Load textures and generate fruits
   loadTextures((params) => {
     // Call animate() function after the fruits have been generated
-    animate();
+    animate(params);
   }, params);
 
   // Create camera
@@ -66,12 +64,12 @@ function init() {
 }
 
 /**
- * 
- * @param {*} min 
- * @param {*} max 
- * @returns 
+ * Generates a random number between min and max (inclusive).
+ * @param {number} min - The minimum number.
+ * @param {number} max - The maximum number.
+ * @returns {number} A random number between min and max.
  */
-function getRandomNumber(min, max) {
+function getRandNum(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
@@ -82,7 +80,7 @@ function loadTextures(callback, params) {
     function (textures) {
       generateFruits(params.radius, textures);
       if (callback) {
-        callback();
+        callback(params);
       }
     });
 }
@@ -241,6 +239,17 @@ function createBomb(radius) {
 }
 
 // -------- Fruit animation
+function setRandPos(fruit) {
+  fruit.position = new THREE.Vector3(getRandNum(-3, 3), -5, getRandNum(-1, 3));
+}
+
+function setRandVelocity(fruit) {
+  var x = getRandNum(-.5, .5);
+  var y = getRandNum(.5, .5);
+  var z = getRandNum(-.1, .5);
+  fruit.velocity = new THREE.Vector3(x, y, z);
+}
+
 /**
  * Given a number, generates a fruit or bomb and pushe sit 
  * @param {*} fruits 
@@ -267,18 +276,14 @@ function addFruit(fruits, num, radius, material){
       fruit = createBomb(radius * .75);
       break;
   }
-  fruit.position = new THREE.Vector3(getRandomNumber(window.innerWidth, window.innerHeight), 
-  getRandomNumber(window.innerWidth, window.innerHeight), 
-  getRandomNumber(-10, 10));
-  fruit.velocity = new THREE.Vector3(getRandomNumber(-1, 1), getRandomNumber(.35, .6), getRandomNumber(-.1, .5));
+
+  resetFruit(fruit);
   fruits.push(fruit);
-  fruitLifeSpan.push(0);
 }
 
 function generateFruits(radius, textures) {
   const materials = makeMaterials(textures);
   fruits = [];
-  fruitLifeSpan = [];
   for (let i = 0; i <= materials.length; i++) {
     if (i < materials.length) {
       addFruit(fruits, i, radius, materials[i]);
@@ -288,49 +293,49 @@ function generateFruits(radius, textures) {
   }
 }
 
-
-function animate() {
-  if (!isGameOver) {
-    requestAnimationFrame(animate);
+/**
+ * Animates the fruits in the scene by updating their positions and rotations.
+ * Resets a fruit when its life span reaches a threshold value.
+ * @param {Object} params - An object containing parameters for the animation
+ */
+function animate(params) {
+  if (!stopped) {
+    requestAnimationFrame(function(){animate(params)});
   } 
 
   // Update fruit positions
   for (let i = 0; i < params.fruitCount; i++) {
     // Generate number to select a fruit or bomb randomly
-    var num = getRandomNumber(0, fruits.length - 1);
+    var num = getRandNum(0, fruits.length - 1);
     var fruit = fruits[num];
-    fruit.position.add(fruits[num].velocity);
+    fruit.position.add(fruit.velocity);
     fruit.velocity.y -= 0.006; // Apply gravity to the fruit's velocity
+    fruit.rotation.x += 0.02;
+    fruit.rotation.y += 0.02;
     container.add(fruit);
-    fruitLifeSpan[num]++;
+    fruit.lifeSpan++;
 
     // Reset fruit position and life span
-    if (fruitLifeSpan[num] > 300) {
-      resetFruit(fruits[num]);
-      fruitLifeSpan[num] = 0;
+    if (fruit.lifeSpan > 240) {
+      resetFruit(fruit);
     }
   }
-
-  for (let i = 0; i < fruits.length; i++) {
-    fruits[num].rotation.x += 0.02;
-    fruits[num].rotation.y += 0.02;
-  }
-
   renderer.render(scene, camera);
 }
 
 function checkFruitSlicing() {
-  if (isGameOver) return;
+  if (stopped) return;
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(container.children, true); // Add 'true' to enable recursive search for child objects
 
   for (let i = 0; i < intersects.length; i++) {
     const object = intersects[i].object;
-    const fruit = object.parent; // Get the parent (THREE.Object3D) of the intersected object (either orange mesh or stem mesh)
+    const fruit = object.parent; // Get the parent of the intersected object
 
     // Remove fruit and update score
-    if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the orange mesh)
+    if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
       fruit.visible = false;
+      //scene.remove(fruit); 
       if (fruit.name == "bomb") {
         gameOver();
         return;
@@ -348,15 +353,9 @@ function checkFruitSlicing() {
 }
 
 function resetFruit(fruit) {
-  fruit.position.x = Math.random() * 20 - 10;
-  fruit.position.y = -5; // Change the initial y position to be below the screen
-  fruit.position.z = Math.random() * 20 - 10;
-
-  // Set initial velocity
-  fruit.velocity.x = (Math.random() - 0.5) * 0.2;
-  fruit.velocity.y = Math.random() * 0.2 + 0.25; // Launch the fruit upwards
-  fruit.velocity.z = (Math.random() - 0.5) * 0.2;
-
+  //setRandPos(fruit);
+  setRandVelocity(fruit);
+  fruit.lifeSpan = 0;
   fruit.visible = true;
 }
 
@@ -369,7 +368,18 @@ function updateHighScore() {
   document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
 }
 
+// -------- Pausing
+function pause() {
+
+}
+
+
 // -------- Game over
+/**
+ * Hides or shows the game over components based on the specified visibility.
+ * @param {boolean} visible - Determines whether the game over message should be 
+ *  visible or hidden
+ */
 function showGameOver(visible) {
   const gameOverDiv = document.getElementById('gameOver');
   if (visible) {
@@ -386,15 +396,15 @@ function gameOver() {
     highScore = score;
   }
   updateHighScore();
-  updateScoreText();
+  //updateScoreText();
   renderer.domElement.style.pointerEvents = 'none';
   showGameOver(true);
-  isGameOver = true;
+  stopped = true;
 }
 
 function retryGame() {
   console.log("Retrying");
-  isGameOver = false;
+  stopped = false;
   updateScoreText();
   showGameOver(false);
   renderer.domElement.style.pointerEvents = 'auto';
