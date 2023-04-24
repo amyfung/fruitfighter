@@ -82,9 +82,10 @@ function loadTextures(callback, params) {
 }
 
 /**
- * 
+ * For each texture given, sets properties for the texture, creates a mesh 
+ * mapped to that texture, and adds the mesh to an array that it returns.
  * @param {*} textures 
- * @returns 
+ * @returns {}
  */
 function makeMaterials(textures) {
   var materials = [];
