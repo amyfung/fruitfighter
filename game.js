@@ -5,6 +5,10 @@ let stopped = false;
 // Initialize game
 init();
 
+/**
+ * Initializes the game by creating the scene, setting up the main global variables,
+ * and attaching event listeners.
+ */
 function init() {
   let params = {
     radius: 4,
@@ -40,10 +44,10 @@ function init() {
   score = 0;
   highScore = 0;
   updateScoreText();
-  
+
   // Create and add lighting
   createLighting(scene);
-  
+
   renderer = new THREE.WebGLRenderer();
   document.body.appendChild(renderer.domElement);
   TW.mainInit(renderer, scene);
@@ -58,19 +62,9 @@ function init() {
 
   var el = document.getElementById("retry");
   if (el.addEventListener)
-      el.addEventListener("click", retryGame, false);
+    el.addEventListener("click", retryGame, false);
   else if (el.attachEvent)
-      el.attachEvent('onclick', retryGame);
-}
-
-/**
- * Generates a random number between min and max (inclusive).
- * @param {number} min - The minimum number.
- * @param {number} max - The maximum number.
- * @returns {number} A random number between min and max.
- */
-function getRandNum(min, max) {
-  return Math.round(Math.random() * (max - min)) + min;
+    el.attachEvent('onclick', retryGame);
 }
 
 
@@ -110,9 +104,9 @@ function makeMaterials(textures) {
  * Given a radius dimension and texture material, creates a parent object
  * and a watermelon mesh before scaling the mesh and adding it to the parent
  * object.
- * @param {*} radius 
- * @param {*} material 
- * @returns 
+ * @param {number} radius - The radius of the watermelon.
+ * @param {THREE.Material} material - The material to be applied to the watermelon mesh.
+ * @returns {THREE.Object3D} A watermelon object.
  */
 function createWatermelon(radius, material) {
   const watermelon = new THREE.Object3D();
@@ -219,18 +213,18 @@ function createBomb(radius) {
   const bombTopMesh = new THREE.Mesh(bombTop, bombMaterial);
   bombTopMesh.position.set(0, 3, 0);
   bomb.add(bombTopMesh);
- 
+
   // create detonating cord using Bezier curves and tube geometry 
   var bezierCurve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(0,0,0), // bottom, center
-    new THREE.Vector3(-.7,1.1,.23), 
-    new THREE.Vector3(.4,1.3,0), 
-    new THREE.Vector3(.2,1.9,.23)
- );
+    new THREE.Vector3(0, 0, 0), // bottom, center
+    new THREE.Vector3(-.7, 1.1, .23),
+    new THREE.Vector3(.4, 1.3, 0),
+    new THREE.Vector3(.2, 1.9, .23)
+  );
   var geom = new THREE.TubeGeometry(bezierCurve, 32, .1, 10, false);
-  var tube = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({color: THREE.ColorKeywords.grey}));
+  var tube = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ color: THREE.ColorKeywords.grey }));
 
-  tube.position.set(0,3,0);
+  tube.position.set(0, 3, 0);
   bomb.add(tube);
 
   bomb.name = "bomb";
@@ -239,6 +233,16 @@ function createBomb(radius) {
 }
 
 // -------- Fruit animation
+/**
+ * Generates a random number between min and max (inclusive).
+ * @param {number} min - The minimum number.
+ * @param {number} max - The maximum number.
+ * @returns {number} A random number between min and max.
+ */
+function getRandNum(min, max) {
+  return Math.round(Math.random() * (max - min)) + min;
+}
+
 function setRandPos(fruit) {
   fruit.position = new THREE.Vector3(getRandNum(-3, 3), -5, getRandNum(-1, 3));
 }
@@ -252,14 +256,14 @@ function setRandVelocity(fruit) {
 
 /**
  * Given a number, generates a fruit or bomb and pushe sit 
- * @param {*} fruits 
- * @param {*} num 
- * @param {*} radius 
- * @param {*} material 
+ * @param {Array} fruits - An array to store the generated fruit or bomb.
+ * @param {number} num - A number to determine the type of fruit or bomb to be generated.
+ * @param {number} radius - The radius of the fruit.
+ * @param {THREE.Material} material - The material to be applied to the fruit mesh.
  */
-function addFruit(fruits, num, radius, material){
+function addFruit(fruits, num, radius, material) {
   var fruit;
-  switch(num) {
+  switch (num) {
     case 0:
       fruit = createOrange(radius, material);
       break;
@@ -281,6 +285,11 @@ function addFruit(fruits, num, radius, material){
   fruits.push(fruit);
 }
 
+/**
+ * Generates fruits using the given radius and textures.
+ * @param {number} radius - The radius of the fruits.
+ * @param {Array} textures - An array of textures for the fruits.
+ */
 function generateFruits(radius, textures) {
   const materials = makeMaterials(textures);
   fruits = [];
@@ -300,8 +309,8 @@ function generateFruits(radius, textures) {
  */
 function animate(params) {
   if (!stopped) {
-    requestAnimationFrame(function(){animate(params)});
-  } 
+    requestAnimationFrame(function () { animate(params) });
+  }
 
   // Update fruit positions
   for (let i = 0; i < params.fruitCount; i++) {
@@ -323,6 +332,10 @@ function animate(params) {
   renderer.render(scene, camera);
 }
 
+/**
+ * Checks if any fruits have been sliced and updates their visibility and the 
+ * score if so.
+ */
 function checkFruitSlicing() {
   if (stopped) return;
   raycaster.setFromCamera(mouse, camera);
@@ -337,7 +350,7 @@ function checkFruitSlicing() {
       fruit.visible = false;
       //scene.remove(fruit); 
       if (fruit.name == "bomb") {
-        gameOver();
+        endGame();
         return;
       }
 
@@ -352,6 +365,10 @@ function checkFruitSlicing() {
   }
 }
 
+/**
+ * Resets the fruit by resetting its velocity and visibility.
+ * @param {THREE.Object3D} fruit - The fruit object to be reset.
+ */
 function resetFruit(fruit) {
   //setRandPos(fruit);
   setRandVelocity(fruit);
@@ -360,10 +377,16 @@ function resetFruit(fruit) {
 }
 
 // -------- Score
+/**
+ * Updates the displayed score text.
+ */
 function updateScoreText() {
   document.getElementById("score").innerHTML = `Score: ${score}`;
 }
 
+/**
+ * Updates the high score text on the screen.
+ */
 function updateHighScore() {
   document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
 }
@@ -391,7 +414,11 @@ function showGameOver(visible) {
   }
 }
 
-function gameOver() {
+/**
+ * Called when a bomb is sliced and updates the high score, displays the game
+ * over components, and stops the game.
+ */
+function endGame() {
   if (score > highScore) {
     highScore = score;
   }
@@ -402,6 +429,10 @@ function gameOver() {
   stopped = true;
 }
 
+/**
+ * Starts the game again by hiding game over components, resetting the fruit, 
+ * and animating without resetting the high score
+ */
 function retryGame() {
   console.log("Retrying");
   stopped = false;
