@@ -73,7 +73,7 @@ function init() {
 // Fruit models
 // ----------------------------------------------------------------------
 function loadTextures(callback, params) {
-  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg", "./images/kiwi.jpg"],
+  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg", "./images/kiwi.jpg", "./images/banana.jpg"],
     function (textures) {
       generateFruits(params.radius, textures);
       if (callback) {
@@ -201,6 +201,7 @@ var bananaParams = {
   radius2: 15,
   radius3: 1
 };
+
 function createBanana () {
   var bezierCurve = new THREE.CubicBezierCurve3(
     new THREE.Vector3(bananaParams['ctrlPt0 x'], bananaParams['ctrlPt0 y'], bananaParams['ctrlPt0 z']), 
@@ -359,6 +360,9 @@ function addFruit(fruits, num, radius, material) {
       fruit = createKiwi(radius / 2, material);
       break;
     case 4:
+      fruit = createBanana(material);
+      break;
+    case 5:
       fruit = createBomb(radius * .75);
       break;
   }
@@ -417,16 +421,29 @@ function animate(params) {
 // ----------------------------------------------------------------------
 // User interaction
 // ----------------------------------------------------------------------
+/**
+ * Handles the mouse up event. Sets the isMouseDown flag to false.
+ * @param {Event} event - The mouse up event.
+ */
 function onMouseUp(event) {
   event.preventDefault();
   isMouseDown = false;
 }
 
+/**
+ * Handles the mouse down event. Sets the isMouseDown flag to true.
+ * @param {Event} event - The mouse down event.
+ */
 function onMouseDown(event) {
   event.preventDefault();
   isMouseDown = true;
 }
 
+/**
+ * Handles the mouse move event, updates the mouse coordinates, and checks if 
+ * a fruit is sliced.
+ * @param {Event} event - The mouse move event.
+ */
 function onMouseMove(event) {
   event.preventDefault();
   if (event.target == renderer.domElement) {
@@ -484,7 +501,9 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// -------- Score
+// ----------------------------------------------------------------------
+// Score
+// ----------------------------------------------------------------------
 /**
  * Updates the displayed score text.
  */
@@ -499,13 +518,9 @@ function updateHighScore() {
   document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
 }
 
-// -------- Pausing
-function pause() {
-
-}
-
-
-// -------- Game over
+// ----------------------------------------------------------------------
+// Game Over and Pausing
+// ----------------------------------------------------------------------
 /**
  * Hides or shows the game over components based on the specified visibility.
  * @param {boolean} visible - Determines whether the game over message should be 
@@ -553,7 +568,12 @@ function retryGame() {
   animate();
 }
 
-// -------- scene utils
+// ----------------------------------------------------------------------
+// Scene Utils
+// ----------------------------------------------------------------------
+/**
+ * Creates a camera for the scene.
+ */
 function createCamera() {
   camera = new THREE.PerspectiveCamera(
     100,
@@ -564,6 +584,10 @@ function createCamera() {
   camera.position.set(0, 0, 30);
 }
 
+/**
+ * Creates and adds lighting to the scene.
+ * @param {THREE.Scene} scene - The scene to which lighting is added.
+ */
 function createLighting(scene) {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
