@@ -72,8 +72,18 @@ function init() {
 // ----------------------------------------------------------------------
 // Fruit models
 // ----------------------------------------------------------------------
+/**
+ * Loads the texture images and calls generateFruits and animate, provided as
+ * a callback function.
+ * @param {function} callback - A call back function.
+ * @param {Object.<string, number>} params - A dictionary of scene parameters.
+ */
 function loadTextures(callback, params) {
-  TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg", "./images/kiwi.jpg", "./images/banana.jpg"],
+  TW.loadTextures(["./images/orange.jpg", // https://storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
+    "./images/watermelon.jpg", // https://thumbs.dreamstime.com/b/watermelon-skin-texture-close-up-watermelon-skin-texture-watermelon-rind-stripes-102872998.jpg
+    "./images/apple.jpg",
+    "./images/kiwi.jpg"],
+    //"./images/banana.jpg"],
     function (textures) {
       generateFruits(params.radius, textures);
       if (callback) {
@@ -136,7 +146,7 @@ function createOrange(radius, material) {
   const orange = new THREE.Object3D();
 
   const orangeGeometry = new THREE.SphereGeometry(radius, 40, 40);
-  // https://storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
+  
   const orangeMesh = new THREE.Mesh(orangeGeometry, material);
   orange.add(orangeMesh);
 
@@ -183,28 +193,27 @@ function createApple(radius, material) {
  * @param {*} 
  * @returns 
  */
-var bananaParams = {
-  'ctrlPt0 x': -43,
-  'ctrlPt0 y': 44,
-  'ctrlPt0 z': 5,
-  'ctrlPt1 x': -54,
-  'ctrlPt1 y': 25,
-  'ctrlPt1 z': 10,
-  'ctrlPt2 x': 75,
-  'ctrlPt2 y': -41,
-  'ctrlPt2 z': -5,
-  'ctrlPt3 x': 94,
-  'ctrlPt3 y': 64,
-  'ctrlPt3 z': 2,
-  radius0: 0,
-  radius1: 9,
-  radius2: 15,
-  radius3: 1
-};
-
-function createBanana () {
+function createBanana(material) {
+  var bananaParams = {
+    'ctrlPt0 x': -43,
+    'ctrlPt0 y': 44,
+    'ctrlPt0 z': 5,
+    'ctrlPt1 x': -54,
+    'ctrlPt1 y': 25,
+    'ctrlPt1 z': 10,
+    'ctrlPt2 x': 75,
+    'ctrlPt2 y': -41,
+    'ctrlPt2 z': -5,
+    'ctrlPt3 x': 94,
+    'ctrlPt3 y': 64,
+    'ctrlPt3 z': 2,
+    radius0: 0,
+    radius1: 9,
+    radius2: 15,
+    radius3: 1
+  };
   var bezierCurve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(bananaParams['ctrlPt0 x'], bananaParams['ctrlPt0 y'], bananaParams['ctrlPt0 z']), 
+    new THREE.Vector3(bananaParams['ctrlPt0 x'], bananaParams['ctrlPt0 y'], bananaParams['ctrlPt0 z']),
     new THREE.Vector3(bananaParams['ctrlPt1 x'], bananaParams['ctrlPt1 y'], bananaParams['ctrlPt1 z']),
     new THREE.Vector3(bananaParams['ctrlPt2 x'], bananaParams['ctrlPt2 y'], bananaParams['ctrlPt2 z']),
     new THREE.Vector3(bananaParams['ctrlPt3 x'], bananaParams['ctrlPt3 y'], bananaParams['ctrlPt3 z'])
@@ -360,9 +369,9 @@ function addFruit(fruits, num, radius, material) {
       fruit = createKiwi(radius / 2, material);
       break;
     case 4:
-      fruit = createBanana(material);
+      /* fruit = createBanana(material);
       break;
-    case 5:
+    case 5: */
       fruit = createBomb(radius * .75);
       break;
   }
@@ -446,12 +455,7 @@ function onMouseDown(event) {
  */
 function onMouseMove(event) {
   event.preventDefault();
-  if (event.target == renderer.domElement) {
-    // Use canvas offset to determine mouse coordinates in canvas coordinate frame
-    var rect = event.target.getBoundingClientRect();
-    var canvasX = event.clientX - rect.left;
-    var canvasY = event.clientY - rect.top;
-  } else {
+  if (!event.target == renderer.domElement) {
     return;
   }
 
