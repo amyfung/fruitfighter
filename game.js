@@ -68,9 +68,7 @@ function init() {
 }
 
 
-// ----------------------------------------------------------------------
-// Fruit models
-// ----------------------------------------------------------------------
+// -------- Create fruit models
 function loadTextures(callback, params) {
   TW.loadTextures(["./images/orange.jpg", "./images/watermelon.jpg", "./images/apple.jpg", "./images/kiwi.jpg"],
     function (textures) {
@@ -121,14 +119,12 @@ function createWatermelon(radius, material) {
   return watermelon;
 }
 
+// TODO: Pass radius and other dimensions as arguments to avoid magical constants
 /**
- * Given a radius dimension and texture material, creates a parent object, an 
- * orange mesh, and an orange stem mesh before adding both meshes to the parent
- * object.
- * @param {number} radius - The radius of the orange.
- * @param {THREE.Material} material - The material to be applied to the 
- *  orange mesh.
- * @returns {THREE.Object3D} An orange object.
+ * 
+ * @param {*} radius 
+ * @param {*} material 
+ * @returns 
  */
 function createOrange(radius, material) {
   const orange = new THREE.Object3D();
@@ -149,13 +145,10 @@ function createOrange(radius, material) {
 }
 
 /**
- * Given a radius dimension and texture material, creates a parent object, an 
- * apple mesh, and an apple stem mesh before adding both meshes to the parent
- * object.
- * @param {number} radius - The radius of the apple.
- * @param {THREE.Material} material - The material to be applied to the apple 
- *  mesh.
- * @returns {THREE.Object3D} An apple object.
+ * 
+ * @param {*} radius 
+ * @param {*} material 
+ * @returns 
  */
 function createApple(radius, material) {
   const apple = new THREE.Object3D();
@@ -176,12 +169,9 @@ function createApple(radius, material) {
 }
 
 /**
- * Given a radius dimension and texture material, creates a parent object and a
- * coconut mesh before adding the coconut mesh to the parent object.
- * @param {number} radius - The radius of the apple.
- * @param {THREE.Material} material - The material to be applied to the apple 
- *  mesh.
- * @returns {THREE.Object3D} An apple object.
+ * 
+ * @param {*} material 
+ * @returns 
  */
 function createCoconut(material) {
   const coconut = new THREE.Object3D();
@@ -193,12 +183,10 @@ function createCoconut(material) {
 }
 
 /**
- * Given a radius dimension and texture material, creates a parent object and a
- * kiwi mesh before scaling the mesh and adding it to the parent object.
- * @param {number} radius - The radius of the kiwi.
- * @param {THREE.Material} material - The material to be applied to the kiwi
- *  mesh.
- * @returns {THREE.Object3D} A kiwi object.
+ * 
+ * @param {*} radius 
+ * @param {*} material 
+ * @returns 
  */
 function createKiwi(radius, material) {
   const kiwi = new THREE.Object3D();
@@ -209,13 +197,57 @@ function createKiwi(radius, material) {
 
   return kiwi;
 }
+/**
+ * 
+ * @param {*}  
+ * @param {*} 
+ * @returns 
+ */
+var bananaParams = {
+  'ctrlPt0 x': -43,
+  'ctrlPt0 y': 44,
+  'ctrlPt0 z': 5,
+  'ctrlPt1 x': -54,
+  'ctrlPt1 y': 25,
+  'ctrlPt1 z': 10,
+  'ctrlPt2 x': 75,
+  'ctrlPt2 y': -41,
+  'ctrlPt2 z': -5,
+  'ctrlPt3 x': 94,
+  'ctrlPt3 y': 64,
+  'ctrlPt3 z': 2,
+  radius0: 0,
+  radius1: 9,
+  radius2: 15,
+  radius3: 1
+};
+function createBanana () {
+  var bezierCurve = new THREE.CubicBezierCurve3(
+    new THREE.Vector3(bananaParams['ctrlPt0 x'], bananaParams['ctrlPt0 y'], bananaParams['ctrlPt0 z']), 
+    new THREE.Vector3(bananaParams['ctrlPt1 x'], bananaParams['ctrlPt1 y'], bananaParams['ctrlPt1 z']),
+    new THREE.Vector3(bananaParams['ctrlPt2 x'], bananaParams['ctrlPt2 y'], bananaParams['ctrlPt2 z']),
+    new THREE.Vector3(bananaParams['ctrlPt3 x'], bananaParams['ctrlPt3 y'], bananaParams['ctrlPt3 z'])
+  );
+
+  var radii = [bananaParams.radius0, bananaParams.radius1, bananaParams.radius2, bananaParams.radius3];
+
+  var bananaGeom = new THREE.TubeRadialGeometry(bezierCurve, 32, radii, 16, false);
+  var bananaMat = new THREE.MeshNormalMaterial();
+  bananaMat.side = THREE.DoubleSide;
+  var banana = new THREE.Mesh(bananaGeom, bananaMat);
+
+  return banana;
+}
+
+var banana = createBanana();
+banana.position.set(-50, 0, 0);
+//const bananaMesh = new THREE.Mesh(bananaGeom, material);
+scene.add(banana);
 
 /**
- * Given a radius dimension, creates a parent object, a bomb mesh, a bomb top
- * mesh, and a detonating cord mesh before positioning the meshes and adding
- * them to the parent object.
- * @param {number} radius - The radius of the bomb body.
- * @returns {THREE.Object3D} A bomb object.
+ * 
+ * @param {*} radius 
+ * @returns 
  */
 function createBomb(radius) {
   const bomb = new THREE.Object3D();
@@ -247,9 +279,7 @@ function createBomb(radius) {
   return bomb;
 }
 
-// ----------------------------------------------------------------------
-// Fruit animation
-// ----------------------------------------------------------------------
+// -------- Fruit animation
 /**
  * Generates a random number between min and max (inclusive).
  * @param {number} min - The minimum number.
@@ -260,36 +290,15 @@ function getRandNum(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
-/**
- * Sets the x and z position coordinates of the given fruit to randomly 
- * generated numbers and the y position coordinate to -5.
- * @param {THREE.Object3D} fruit - The fruit whose position is to be set.
- */
 function setRandPos(fruit) {
   fruit.position = new THREE.Vector3(getRandNum(-3, 3), -5, getRandNum(-1, 3));
 }
 
-/**
- * Randomly the velocity of the given fruit.
- * @param {THREE.Object3D} fruit - The fruit whose velocity is to be set.
- */
 function setRandVelocity(fruit) {
   var x = getRandNum(-.5, .5);
   var y = getRandNum(.5, .5);
   var z = getRandNum(-.1, .5);
   fruit.velocity = new THREE.Vector3(x, y, z);
-}
-
-/**
- * Resets the fruit by resetting its position, velocity, life span, and 
- *  visibility.
- * @param {THREE.Object3D} fruit - The fruit object to be reset.
- */
-function resetFruit(fruit) {
-  setRandPos(fruit);
-  setRandVelocity(fruit);
-  fruit.lifeSpan = 0;
-  fruit.visible = true;
 }
 
 /**
@@ -315,6 +324,9 @@ function addFruit(fruits, num, radius, material) {
       fruit = createKiwi(radius / 2, material);
       break;
     case 4:
+      fruit = createBanana(radius, material);
+      break;
+    case 5:
       fruit = createBomb(radius * .75);
       break;
   }
@@ -370,36 +382,6 @@ function animate(params) {
   renderer.render(scene, camera);
 }
 
-// ----------------------------------------------------------------------
-// User interaction
-// ----------------------------------------------------------------------
-function onMouseUp(event) {
-  event.preventDefault();
-  isMouseDown = false;
-}
-
-function onMouseDown(event) {
-  event.preventDefault();
-  isMouseDown = true;
-}
-
-function onMouseMove(event) {
-  event.preventDefault();
-  if (event.target == renderer.domElement) {
-    // Use canvas offset to determine mouse coordinates in canvas coordinate frame
-    var rect = event.target.getBoundingClientRect();
-    var canvasX = event.clientX - rect.left;
-    var canvasY = event.clientY - rect.top;
-  } else {
-    return;
-  }
-
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  checkFruitSlicing();
-}
-
 /**
  * Checks if any fruits have been sliced and updates their visibility and the 
  * score if so.
@@ -433,11 +415,15 @@ function checkFruitSlicing() {
   }
 }
 
-// Handle window resize
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+/**
+ * Resets the fruit by resetting its velocity and visibility.
+ * @param {THREE.Object3D} fruit - The fruit object to be reset.
+ */
+function resetFruit(fruit) {
+  //setRandPos(fruit);
+  setRandVelocity(fruit);
+  fruit.lifeSpan = 0;
+  fruit.visible = true;
 }
 
 // -------- Score
@@ -530,4 +516,36 @@ function createLighting(scene) {
 }
 
 // -------- user interaction
+function onMouseUp(event) {
+  event.preventDefault();
+  isMouseDown = false;
+}
 
+function onMouseDown(event) {
+  event.preventDefault();
+  isMouseDown = true;
+}
+
+function onMouseMove(event) {
+  event.preventDefault();
+  if (event.target == renderer.domElement) {
+    // Use canvas offset to determine mouse coordinates in canvas coordinate frame
+    var rect = event.target.getBoundingClientRect();
+    var canvasX = event.clientX - rect.left;
+    var canvasY = event.clientY - rect.top;
+  } else {
+    return;
+  }
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  checkFruitSlicing();
+}
+
+// Handle window resize
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
