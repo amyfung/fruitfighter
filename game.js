@@ -28,7 +28,7 @@ function init() {
   mouse = new THREE.Vector2();
 
   // Hide game over components
-  showGameOver(false);
+  //showGameOver(false);
 
   // Initialize score
   score = 0;
@@ -38,18 +38,23 @@ function init() {
   createLighting();
   
   renderer = new THREE.WebGLRenderer();
+  document.body.appendChild(renderer.domElement);
   TW.mainInit(renderer, scene);
 
   // Add controls
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-  //document.getElementById("retry").onclick = retryGame;
+
   // Add event listeners
-  window.addEventListener('mousedown', onMouseDown, false);
-  window.addEventListener('mousemove', onMouseMove, false);
-  window.addEventListener('mouseup', onMouseUp, false);
-  window.addEventListener('resize', onWindowResize, false);
-  //document.getElementById("retry").addEventListener("click", retryGame, false);
+  renderer.domElement.addEventListener('mousedown', onMouseDown, false);
+  renderer.domElement.addEventListener('mousemove', onMouseMove, false);
+  renderer.domElement.addEventListener('mouseup', onMouseUp, false);
+
+  var el = document.getElementById("retry");
+  if (el.addEventListener)
+      el.addEventListener("click", retryGame, false);
+  else if (el.attachEvent)
+      el.attachEvent('onclick', retryGame);
 }
 
 function getRandomNumber(min, max) {
@@ -188,7 +193,7 @@ function generateFruits(textures) {
     var fruit = null;
 
     // randomly choose a fruit or a bomb
-    switch(getRandomNumber(0, materials.length)) {
+    switch(getRandomNumber(4, materials.length)) {
       case 0:
         fruit = createOrange(materials[0]);
         break;
@@ -311,10 +316,9 @@ function gameOver() {
   }
   updateHighScore();
   updateScoreText();
-  
+  renderer.domElement.style.pointerEvents = 'none';
   showGameOver(true);
   isGameOver = true;
-  //document.getElementById("retry").disabled = false;
 }
 
 function retryGame() {
@@ -322,6 +326,7 @@ function retryGame() {
   isGameOver = false;
   updateScoreText();
   showGameOver(false);
+  renderer.domElement.style.pointerEvents = 'auto';
   for (let i = 0; i < fruits.length; i++) {
     resetFruit(fruits[i]);
   }
@@ -351,7 +356,7 @@ function createLighting() {
 // -------- user interaction
 function onMouseUp(event) {
   event.preventDefault();
-  isMouseDown = false;;
+  isMouseDown = false;
 }
 
 function onMouseDown(event) {

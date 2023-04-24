@@ -39,6 +39,8 @@ canvas {
   text-align: center;
   vertical-align: middle;
   font-family: "Gang of Three", Arial, Helvetica, sans-serif;
+  pointer-events: auto; 
+  z-index: 99999999999; 
 }
 
 
