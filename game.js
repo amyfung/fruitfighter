@@ -484,15 +484,12 @@ function checkFruitSlicing() {
     // Remove fruit and update score
     if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
       fruit.visible = false;
-      //scene.remove(fruit); 
       if (fruit.name == "bomb") {
         endGame();
         return;
       }
-
       score++;
       updateScoreText();
-
       // Delay fruit respawn
       setTimeout(() => {
         resetFruit(fruit);
