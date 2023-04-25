@@ -32,6 +32,7 @@ function init() {
 
   // Create camera
   createCamera();
+  
 
   // Initializing raycaster and mouse
   raycaster = new THREE.Raycaster();
@@ -49,8 +50,10 @@ function init() {
   createLighting(scene);
 
   renderer = new THREE.WebGLRenderer();
-  //document.body.appendChild(renderer.domElement);
-  TW.mainInit(renderer, scene);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  document.body.appendChild(renderer.domElement);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  //TW.mainInit(renderer, scene);
 
   // Add controls
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -59,7 +62,7 @@ function init() {
   renderer.domElement.addEventListener('mousedown', onMouseDown, false);
   renderer.domElement.addEventListener('mousemove', onMouseMove, false);
   renderer.domElement.addEventListener('mouseup', onMouseUp, false);
-  renderer.domElement.addEventListener('resize', onWindowResize, false);
+  //renderer.domElement.addEventListener('resize', onWindowResize, false);
 
   var el = document.getElementById("retry");
   if (el.addEventListener)
@@ -81,9 +84,9 @@ function init() {
 function loadTextures(callback, params) {
   TW.loadTextures(["./images/orange.jpg", // https://storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
     "./images/watermelon.jpg", // https://thumbs.dreamstime.com/b/watermelon-skin-texture-close-up-watermelon-skin-texture-watermelon-rind-stripes-102872998.jpg
-    "./images/apple.jpg",
-    "./images/kiwi.jpg",
-    "./images/banana.jpg"],
+    "./images/apple.jpg", //https://stock.adobe.com/ie/images/close-up-photo-of-red-apple-background-apples-fruit-peel-texture-macro-view-beautiful-natural-wallpaper/428378061
+    "./images/kiwi.jpg", //https://stock.adobe.com/images/kiwi-fruit-peel-macro-texture/62101744
+    "./images/banana.jpg"], //https://seamless-pixels.blogspot.com/2012/01/seamless-banana-skin.html
     function (textures) {
       generateFruits(params.radius, textures);
       if (callback) {
@@ -146,15 +149,14 @@ function createOrange(radius, material) {
   const orange = new THREE.Object3D();
 
   const orangeGeometry = new THREE.SphereGeometry(radius, 40, 40);
-  
   const orangeMesh = new THREE.Mesh(orangeGeometry, material);
   orange.add(orangeMesh);
 
   // stem
-  const stemGeom = new THREE.CylinderGeometry(radius / 20, .25, .8);
+  const stemGeom = new THREE.CylinderGeometry(radius / 20, radius / 8, .8);
   const stemMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color("green") });
   const stem = new THREE.Mesh(stemGeom, stemMaterial);
-  stem.position.set(0, 3, 0);
+  stem.position.set(0, radius, 0);
   orange.add(stem);
 
   return orange;
@@ -176,10 +178,10 @@ function createApple(radius, material) {
   apple.add(appleMesh);
 
   // stem
-  const appleStemGeom = new THREE.CylinderGeometry(.2, .25, .8);
-  const appleStemMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color("brown") });
+  const appleStemGeom = new THREE.CylinderGeometry(radius / 20, radius / 20, radius / 4);
+  const appleStemMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color('rgb(111, 78, 55)') });
   const appleStem = new THREE.Mesh(appleStemGeom, appleStemMaterial);
-  appleStem.position.set(.25, .25, 1);
+  appleStem.position.set(0, radius, 0);
   apple.add(appleStem);
 
   // NOTE: add leaf
@@ -194,24 +196,24 @@ function createApple(radius, material) {
  * @returns 
  */
 function createBanana(material) {
-  var bananaParams = {
-    'ctrlPt0 x': -43,
-    'ctrlPt0 y': 44,
-    'ctrlPt0 z': 5,
-    'ctrlPt1 x': -54,
-    'ctrlPt1 y': 25,
-    'ctrlPt1 z': 10,
-    'ctrlPt2 x': 75,
-    'ctrlPt2 y': -41,
-    'ctrlPt2 z': -5,
-    'ctrlPt3 x': 94,
-    'ctrlPt3 y': 64,
-    'ctrlPt3 z': 2,
-    radius0: 0,
-    radius1: 9,
-    radius2: 15,
-    radius3: 1
-  };
+    var bananaParams = {
+      'ctrlPt0 x': -14,
+      'ctrlPt0 y': 14,
+      'ctrlPt0 z': 5,
+      'ctrlPt1 x': -18,
+      'ctrlPt1 y': 8,
+      'ctrlPt1 z': 10,
+      'ctrlPt2 x': 25,
+      'ctrlPt2 y': -14,
+      'ctrlPt2 z': -5,
+      'ctrlPt3 x': 31,
+      'ctrlPt3 y': 21,
+      'ctrlPt3 z': 2,
+      radius0: 0,
+      radius1: 3,
+      radius2: 5,
+      radius3: 1,
+    };
   var bezierCurve = new THREE.CubicBezierCurve3(
     new THREE.Vector3(bananaParams['ctrlPt0 x'], bananaParams['ctrlPt0 y'], bananaParams['ctrlPt0 z']),
     new THREE.Vector3(bananaParams['ctrlPt1 x'], bananaParams['ctrlPt1 y'], bananaParams['ctrlPt1 z']),
@@ -224,7 +226,7 @@ function createBanana(material) {
   var bananaGeom = new THREE.TubeRadialGeometry(bezierCurve, 32, radii, 16, false);
   var bananaMat = new THREE.MeshNormalMaterial();
   bananaMat.side = THREE.DoubleSide;
-  var banana = new THREE.Mesh(bananaGeom, bananaMat);
+  var banana = new THREE.Mesh(bananaGeom, material);
 
   return banana;
 }
@@ -262,7 +264,6 @@ function createKiwi(radius, material) {
   const kiwiMesh = new THREE.Mesh(kiwiGeom, material);
   kiwiMesh.scale.set(1, 1.25, 1);
   kiwi.add(kiwiMesh);
-  //kiwi.scale.set(1, 1.25, 1);
 
   return kiwi;
 }
@@ -281,9 +282,9 @@ function createBomb(radius) {
   const bombMesh = new THREE.Mesh(bombGeom, bombMaterial);
   bomb.add(bombMesh);
 
-  const bombTop = new THREE.CylinderGeometry(1, 1, 1, 20);
+  const bombTop = new THREE.CylinderGeometry(radius / 3, radius / 3, 1, 20);
   const bombTopMesh = new THREE.Mesh(bombTop, bombMaterial);
-  bombTopMesh.position.set(0, 3, 0);
+  bombTopMesh.position.set(0, radius, 0);
   bomb.add(bombTopMesh);
 
   // create detonating cord using Bezier curves and tube geometry 
@@ -296,7 +297,7 @@ function createBomb(radius) {
   var geom = new THREE.TubeGeometry(bezierCurve, 32, .1, 10, false);
   var tube = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ color: THREE.ColorKeywords.grey }));
 
-  tube.position.set(0, 3, 0);
+  tube.position.set(0, radius, 0); // place at the top center of the bomb
   bomb.add(tube);
 
   bomb.name = "bomb";
@@ -317,25 +318,21 @@ function getRandNum(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
-/**
- * Sets the x and z position coordinates of the given fruit to randomly 
- * generated numbers and the y position coordinate to -5.
- * @param {THREE.Object3D} fruit - The fruit whose position is to be set.
- */
 function setRandPos(fruit) {
-  fruit.position = new THREE.Vector3(getRandNum(-3, 3), -5, getRandNum(-1, 3));
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  var randX = getRandNum(-10 * camera.aspect, 10 * camera.aspect);
+  fruit.position = new THREE.Vector3(randX, -5, getRandNum(-.5, 1));
 }
 
-/**
- * Randomly the velocity of the given fruit.
- * @param {THREE.Object3D} fruit - The fruit whose velocity is to be set.
- */
 function setRandVelocity(fruit) {
   var x = getRandNum(-.5, .5);
-  var y = getRandNum(.5, .5);
-  var z = getRandNum(-.1, .5);
+  var y = getRandNum(.25, .75);
+  var z = getRandNum(-.1, .1);
   fruit.velocity = new THREE.Vector3(x, y, z);
 }
+
 
 /**
  * Resets the fruit by resetting its position, velocity, life span, and 
@@ -372,7 +369,7 @@ function addFruit(fruits, num, radius, material) {
       fruit = createKiwi(radius / 2, material);
       break;
     case 4:
-      fruit = createBanana(material);
+      fruit = createBanana(radius/2, material);
       break;
     case 5:
       fruit = createBomb(radius * .75);
@@ -580,12 +577,15 @@ function retryGame() {
  */
 function createCamera() {
   camera = new THREE.PerspectiveCamera(
-    100,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
+    75, // fov
+    window.innerWidth / window.innerHeight, // aspect
+    .1, // near
+    1000 // far
   );
-  camera.position.set(0, 0, 30);
+  console.log(camera.aspect);
+  //camera.lookAt(scene.position);
+  camera.position.set(0, 0, 40);
+  return camera;
 }
 
 /**
