@@ -181,10 +181,10 @@ function createApple(radius, material) {
 }
 
 /**
- * 
- * @param {*}  
- * @param {*} 
- * @returns 
+ * Given a texture material, creates a parent object and a banana mesh and adds
+ * the mesh to the parent object before returning it.
+ * @param {THREE.Material} material - The material to be applied to the banana
+ * @returns {THREE.Object3D} A banana object.
  */
 function createBanana(material) {
   var bananafruitParams = {
