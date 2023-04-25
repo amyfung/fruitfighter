@@ -81,9 +81,9 @@ function init() {
 function loadTextures(callback, params) {
   TW.loadTextures(["./images/orange.jpg", // https://storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
     "./images/watermelon.jpg", // https://thumbs.dreamstime.com/b/watermelon-skin-texture-close-up-watermelon-skin-texture-watermelon-rind-stripes-102872998.jpg
-    "./images/apple.jpg",
-    "./images/kiwi.jpg",
-    "./images/banana.jpg"],
+    "./images/apple.jpg", //https://stock.adobe.com/ie/images/close-up-photo-of-red-apple-background-apples-fruit-peel-texture-macro-view-beautiful-natural-wallpaper/428378061
+    "./images/kiwi.jpg", //https://stock.adobe.com/images/kiwi-fruit-peel-macro-texture/62101744
+    "./images/banana.jpg"], //https://seamless-pixels.blogspot.com/2012/01/seamless-banana-skin.html
     function (textures) {
       generateFruits(params.radius, textures);
       if (callback) {
