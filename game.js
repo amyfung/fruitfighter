@@ -1,11 +1,14 @@
-
-let fruitParams, scene, camera, renderer, fruits, container, raycaster, mouse, score, 
-highScore, isMouseDown;
+/**
+ * Amy Fung and Lana Abdi
+ * CS307 - Graphics
+ * HW6: Creative Scene
+ */
+let fruitParams, scene, camera, renderer, fruits, container, raycaster, mouse, score,
+  highScore, isMouseDown;
 let stopped = false;
 
 // Initialize game
 init();
-
 
 /* *
  * Initializes the game by creating the scene, setting up the main global variables,
@@ -55,8 +58,7 @@ function init() {
 
   // Add event listeners
   addEventListeners();
-} 
-
+}
 
 // ----------------------------------------------------------------------
 // Fruit models
@@ -64,21 +66,21 @@ function init() {
 /**
  * Loads the texture images and calls generateFruits and animate, provided as
  * a callback function.
- * @param {function} callback - A call back function.
+ * @param {function} callback - A callback function.
  */
 function loadTextures(callback) {
   TW.loadTextures([
     // storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
-    "./images/orange.jpg", 
+    "./images/orange.jpg",
     // https://thumbs.dreamstime.com/b/watermelon-skin-texture-close-up-watermelon-skin-texture-watermelon-rind-stripes-102872998.jpg
-    "./images/watermelon.jpg", 
+    "./images/watermelon.jpg",
     //https://stock.adobe.com/ie/images/close-up-photo-of-red-apple-background-apples-fruit-peel-texture-macro-view-beautiful-natural-wallpaper/428378061
-    "./images/apple.jpg", 
+    "./images/apple.jpg",
     //https://stock.adobe.com/images/kiwi-fruit-peel-macro-texture/62101744
-    "./images/kiwi.jpg", 
+    "./images/kiwi.jpg",
     //https://seamless-pixels.blogspot.com/2012/01/seamless-banana-skin.html
     //"./images/banana.jpg"
-  ], 
+  ],
     function (textures) {
       generateFruits(textures);
       if (callback) {
@@ -185,24 +187,24 @@ function createApple(radius, material) {
  * @returns 
  */
 function createBanana(material) {
-    var bananafruitParams = {
-      'ctrlPt0 x': -14,
-      'ctrlPt0 y': 14,
-      'ctrlPt0 z': 5,
-      'ctrlPt1 x': -18,
-      'ctrlPt1 y': 8,
-      'ctrlPt1 z': 10,
-      'ctrlPt2 x': 25,
-      'ctrlPt2 y': -14,
-      'ctrlPt2 z': -5,
-      'ctrlPt3 x': 31,
-      'ctrlPt3 y': 21,
-      'ctrlPt3 z': 2,
-      radius0: 0,
-      radius1: 3,
-      radius2: 5,
-      radius3: 1,
-    };
+  var bananafruitParams = {
+    'ctrlPt0 x': -14,
+    'ctrlPt0 y': 14,
+    'ctrlPt0 z': 5,
+    'ctrlPt1 x': -18,
+    'ctrlPt1 y': 8,
+    'ctrlPt1 z': 10,
+    'ctrlPt2 x': 25,
+    'ctrlPt2 y': -14,
+    'ctrlPt2 z': -5,
+    'ctrlPt3 x': 31,
+    'ctrlPt3 y': 21,
+    'ctrlPt3 z': 2,
+    radius0: 0,
+    radius1: 3,
+    radius2: 5,
+    radius3: 1,
+  };
   var bezierCurve = new THREE.CubicBezierCurve3(
     new THREE.Vector3(bananafruitParams['ctrlPt0 x'], bananafruitParams['ctrlPt0 y'], bananafruitParams['ctrlPt0 z']),
     new THREE.Vector3(bananafruitParams['ctrlPt1 x'], bananafruitParams['ctrlPt1 y'], bananafruitParams['ctrlPt1 z']),
@@ -259,7 +261,7 @@ function createBomb(radius) {
 
   // Create detonating cord using Bezier curves and tube geometry 
   var bezierCurve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(0, 0, 0), 
+    new THREE.Vector3(0, 0, 0),
     new THREE.Vector3(-.7, 1.1, .23),
     new THREE.Vector3(.4, 1.3, 0),
     new THREE.Vector3(.2, 1.9, .23)
@@ -293,7 +295,7 @@ function getRandNum(min, max) {
  * @param {THREE.Object3D} fruit - The fruit object to set the position for.
 */
 function setRandPos(fruit) {
-  var randX = getRandNum(-fruitParams.max * camera.aspect, fruitParams.max * camera.aspect);
+  var randX = getRandNum(-fruitParams.max / 2 * camera.aspect, fruitParams.max * camera.aspect);
   var randZ = getRandNum(-fruitParams.max / 2, fruitParams.max);
   fruit.position = new THREE.Vector3(randX, -fruitParams.max, randZ);
 }
@@ -309,7 +311,6 @@ function setRandVelocity(fruit) {
   var z = getRandNum(-.1, .3);
   fruit.velocity = new THREE.Vector3(x, y, z);
 }
-
 
 /**
  * Resets the fruit by resetting its position, velocity, life span, and 
@@ -345,10 +346,10 @@ function addFruit(fruits, num, radius, material) {
     case 3:
       fruit = createKiwi(radius / 2, material);
       break;
-    case 4:
+    case 4:/* 
       fruit = createBanana(radius / 2, material);
       break;
-    case 5:
+    case 5: */
       fruit = createBomb(radius * .75);
       break;
   }
@@ -381,7 +382,7 @@ function generateFruits(textures) {
  */
 function animate() {
   if (!stopped) {
-    requestAnimationFrame(function() { animate() });
+    requestAnimationFrame(function () { animate() });
   }
 
   // Update fruit positions
@@ -449,27 +450,29 @@ function onMouseMove(event) {
 function checkFruitSlicing() {
   if (stopped) return;
   raycaster.setFromCamera(mouse, camera);
-  raycaster.params.Points.threshold = .5;
+  raycaster.params.Points.threshold = 1;
   // Add 'true' to enable recursive search for child objects
-  const intersects = raycaster.intersectObjects(container.children, true); 
+  const intersects = raycaster.intersectObjects(container.children, true);
 
   for (let i = 0; i < intersects.length; i++) {
     const object = intersects[i].object;
     const fruit = object.parent; // Get the parent of the intersected object
 
     // Remove fruit and update score
-    if (fruit.visible && fruit.name == "fruit" && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
-      fruit.visible = false;
+    if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
       if (fruit.name == "bomb") {
         endGame();
         return; // Score is not incremented if a bomb is sliced
-      } 
-      score++;
-      updateScoreText();
-      // Delay fruit respawn
-      setTimeout(() => {
-        resetFruit(fruit);
-      }, 1000);
+      }
+      if (fruit.name == "fruit") {
+        fruit.visible = false;
+        score++;
+        updateScoreText();
+        // Delay fruit respawn
+        setTimeout(() => {
+          resetFruit(fruit);
+        }, 1000);
+      }
     }
   }
 }
@@ -571,7 +574,7 @@ function retryGame() {
  */
 function createScene() {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("white"); 
+  scene.background = new THREE.Color("white");
   return scene;
 }
 
