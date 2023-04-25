@@ -372,7 +372,7 @@ function addFruit(fruits, num, radius, material) {
       fruit = createKiwi(radius / 2, material);
       break;
     case 4:
-      fruit = createBanana(material);
+      fruit = createBanana(radius/2, material);
       break;
     case 5:
       fruit = createBomb(radius * .75);
