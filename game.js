@@ -1,5 +1,6 @@
 let fruitParams, scene, camera, renderer, fruits, container, raycaster, mouse, score,
-  highScore, isMouseDown, particleMaterial;
+  highScore, isMouseDown;
+let explosionParticles;
 let stopped = false;
 
 // Initialize game
@@ -21,22 +22,13 @@ function init() {
   container = new THREE.Object3D();
   container.name = "container";
   scene.add(container);
-
+  createExplosionParticles();
   // Load textures and generate fruits
   loadTextures(() => {
     // Call animate() function after the fruits have been generated
     animate();
   });
 
-  particleMaterial = new THREE.PointsMaterial({
-    size: 0.2,
-    color: 0xff9900,
-    transparent: true,
-    opacity: 0.7,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    map: new THREE.TextureLoader().load('./images/particles.png'),
-  });
   // Create camera
   createCamera();
 
@@ -79,7 +71,7 @@ function loadTextures(callback) {
     //https://stock.adobe.com/images/kiwi-fruit-peel-macro-texture/62101744
     "./images/kiwi.jpg",
     //https://seamless-pixels.blogspot.com/2012/01/seamless-banana-skin.html
-    //"./images/banana.jpg"
+    "./images/banana.jpg"
   ],
     function (textures) {
       generateFruits(textures);
@@ -89,13 +81,7 @@ function loadTextures(callback) {
     });
 }
 
-/**
- * For each texture given, sets properties for the texture, creates a material
- * mapped to that texture, and adds the material to an array that
- * it returns.
- * @param {THREE.Texture[]} textures - The array of textures to create materials from.
- * @returns {THREE.MeshPhongMaterial[]} The array of materials.
- */
+
 function makeMaterials(textures) {
   var materials = [];
   for (var i = 0; i < textures.length; i++) {
@@ -239,6 +225,20 @@ function createBomb(radius) {
   return bomb;
 }
 
+function createExplosionParticles() {
+  const particleCount = 500;
+  const particleGeometry = new THREE.SphereGeometry(1);
+  const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xff9900 });
+
+  explosionParticles = new THREE.Group();
+  for (let i = 0; i < particleCount; i++) {
+    const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+    explosionParticles.add(particle);
+    particle.visible = false;
+  }
+  scene.add(explosionParticles);
+}
+
 // ----------------------------------------------------------------------
 // Fruit animation
 // ----------------------------------------------------------------------
@@ -282,10 +282,10 @@ function addFruit(fruits, num, radius, material) {
     case 3:
       fruit = createKiwi(radius / 2, material);
       break;
-    case 4:/* 
+    case 4:
       fruit = createBanana(radius / 2, material);
       break;
-    case 5: */
+    case 5: 
       fruit = createBomb(radius * .75);
       break;
   }
@@ -334,8 +334,33 @@ function animate() {
       resetFruit(fruit);
     }
   }
-  
+  for (let i = 0; i < explosionParticles.children.length; i++) {
+    const particle = explosionParticles.children[i];
+    if (particle.visible) {
+      particle.position.add(particle.velocity);
+      particle.velocity.y -= 0.05;
+      particle.scale.multiplyScalar(0.95);
+      if (particle.scale.x < 0.01) {
+        particle.visible = false;
+      }
+    }
+  }
   renderer.render(scene, camera);
+}
+
+function explodeFruit(fruit) {
+  for (let i = 0; i < explosionParticles.children.length; i++) {
+    const particle = explosionParticles.children[i];
+    particle.position.copy(fruit.position);
+    particle.visible = true;
+
+    const velocity = new THREE.Vector3(
+      (Math.random() - 0.5) * 3,
+      (Math.random() - 0.5) * 3,
+      (Math.random() - 0.5) * 3
+    ); 
+    particle.velocity = velocity;
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -363,10 +388,6 @@ function onMouseMove(event) {
   checkFruitSlicing();
 }
 
-/**
- * Checks if any fruits have been sliced and updates their visibility and the 
- * score if so.
- */
 function checkFruitSlicing() {
   if (stopped) return;
   raycaster.setFromCamera(mouse, camera);
@@ -379,14 +400,13 @@ function checkFruitSlicing() {
     const fruit = object.parent; // Get the parent of the intersected object
     // Remove fruit and update score
     if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
+      explodeFruit(fruit);
       if (fruit.name == "bomb") {
-        //createExplosion(fruit);
         endGame();
         return; // Score is not incremented if a bomb is sliced
       }
       if (fruit.name == "fruit") {
         fruit.visible = false;
-        //createExplosion(fruit);
         score++;
         updateScoreText();
         // Delay fruit respawn
@@ -398,41 +418,12 @@ function checkFruitSlicing() {
   }
 }
 
-function createExplosion(fruit) {
-  const explosion = new THREE.Object3D();
-  const geometry = new THREE.SphereGeometry(.5, 32, 32); // Increased size
-  const material = new THREE.MeshBasicMaterial({ color: 0xff4500 }); // Changed color to make more noticeable
-
-  for (let i = 0; i < 200; i++) { // Increased the number of particles
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.velocity = fruit.velocity;
-    mesh.position.copy(fruit.position);
-    mesh.scale.multiplyScalar(Math.random() * .5); // Increased scale
-    mesh.lifetime = 0;
-    explosion.add(mesh);
-    container.add(explosion);
-    if (mesh.lifetime < 10) { // Decreased lifetime
-      mesh.lifetime++;
-      mesh.position.add(mesh.velocity);
-      mesh.scale.multiplyScalar(0.9); // Increased shrinking rate
-      requestAnimationFrame(animateExplosion);
-    } else {
-      container.remove(explosion);
-    }
-  }
-  // Animate and remove explosion particles
- 
-}
-
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-/**
- * Adds event listeners for mouse events and window resize events.
- */
 function addEventListeners() {
   renderer.domElement.addEventListener('mousedown', onMouseDown, false);
   renderer.domElement.addEventListener('mouseup', onMouseUp, false);

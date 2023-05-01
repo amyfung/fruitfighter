@@ -14,40 +14,34 @@ canvas {
   height: 80%;
   width: 80%;
 }
+
 #scoreDisplay {
   position: absolute;
   font-size: 2em;
   z-index: 100;
-  margin: auto;
-  padding-top: 10px;
+  left: 10px;
+  top: 10px;
 }
 
 h1,
 #score,
 #highScore {
   font-family: "Gang of Three", Arial, Helvetica, sans-serif;
-  text-align: 'center';
-}
-
-#logo { 
-  width: auto;
-  height: auto;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  text-align:center;
   
 }
 
+#logo { 
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 #logo img {
-  width: auto;
+  width: 40%;
   height: auto;
-  margin: auto;
-  display:inline-block;
+  max-width: 300px;
 } 
-
-
-
 
 .button {
   text-align: center;
