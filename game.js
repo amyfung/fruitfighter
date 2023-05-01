@@ -66,15 +66,15 @@ function init() {
 function loadTextures(callback) {
   TW.loadTextures([
     // storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
-    "./images/orange.jpg",
+    "./assets/images/orange.jpg",
     // https://thumbs.dreamstime.com/b/watermelon-skin-texture-close-up-watermelon-skin-texture-watermelon-rind-stripes-102872998.jpg
-    "./images/watermelon.jpg",
+    "./assets/images/watermelon.jpg",
     //https://stock.adobe.com/ie/images/close-up-photo-of-red-apple-background-apples-fruit-peel-texture-macro-view-beautiful-natural-wallpaper/428378061
-    "./images/apple.jpg",
+    "./assets/images/apple.jpg",
     //https://stock.adobe.com/images/kiwi-fruit-peel-macro-texture/62101744
-    "./images/kiwi.jpg",
+    "./assets/images/kiwi.jpg",
     //https://seamless-pixels.blogspot.com/2012/01/seamless-banana-skin.html
-    "./images/banana.jpg"
+    "./assets/images/banana.jpg"
   ],
     function (textures) {
       generateFruits(textures);
@@ -492,7 +492,6 @@ function onMouseMove(event) {
 function checkFruitSlicing() {
   if (stopped) return;
   raycaster.setFromCamera(mouse, camera);
-  //raycaster.params.Points.threshold = 1;
   // Add 'true' to enable recursive search for child objects
   const intersects = raycaster.intersectObjects(container.children, true);
 
@@ -543,7 +542,9 @@ function addEventListeners() {
 // ----------------------------------------------------------------------
 // Game display
 // ----------------------------------------------------------------------
-
+/**
+ * 
+ */
 function updateScoreText() {
   document.getElementById("score").innerHTML = `Score: ${score}`;
 }

@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Gang of Three";
-  src: local("./go3v2.tff");
+  src: local("./assets/fonts/go3v2.tff");
 }
 
 canvas {
