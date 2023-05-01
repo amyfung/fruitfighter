@@ -272,6 +272,9 @@ function createBomb(radius) {
   return bomb;
 }
 
+// ----------------------------------------------------------------------
+// Explosion animation
+// ----------------------------------------------------------------------
 var colors = [0xff9900, 0x9D00FF, 0x39FF14];
 
 function createExplosionParticles() {
@@ -288,7 +291,23 @@ function createExplosionParticles() {
     particle.visible = false;
   }
   explosionParticles.lifeSpan = 0;
-  //container.add(explosionParticles);
+}
+
+function explodeFruit(fruit) {
+  container.remove(explosionParticles);
+  createExplosionParticles();
+  for (let i = 0; i < explosionParticles.children.length; i++) {
+    const particle = explosionParticles.children[i];
+    particle.position.copy(fruit.position);
+    particle.visible = true;
+
+    const velocity = new THREE.Vector3(
+      getRandNum(-2,2),
+      getRandNum(-2,2),
+      getRandNum(-2,2)
+    );
+    particle.velocity = velocity;
+  }
 }
 
 // ----------------------------------------------------------------------
@@ -447,22 +466,7 @@ function animate() {
 }
 
 
-function explodeFruit(fruit) {
-  container.remove(explosionParticles);
-  createExplosionParticles();
-  for (let i = 0; i < explosionParticles.children.length; i++) {
-    const particle = explosionParticles.children[i];
-    particle.position.copy(fruit.position);
-    particle.visible = true;
 
-    const velocity = new THREE.Vector3(
-      getRandNum(-2,2),
-      getRandNum(-2,2),
-      getRandNum(-2,2)
-    );
-    particle.velocity = velocity;
-  }
-}
 
 // ----------------------------------------------------------------------
 // User interaction
@@ -538,6 +542,12 @@ function addEventListeners() {
     el.addEventListener("click", retryGame, false);
   else if (el.attachEvent)
     el.attachEvent('onclick', retryGame);
+
+    var pause = document.getElementById("pause");
+    if (pause.addEventListener)
+      pause.addEventListener("click", pauseGame, false);
+    else if (pause.attachEvent)
+      pause.attachEvent('onclick', pauseGame);
 }
 // ----------------------------------------------------------------------
 // Game display
@@ -589,6 +599,20 @@ function retryGame() {
     resetFruit(fruits[i]);
   }
   animate();
+}
+
+function pauseGame() {
+  if (stopped) {
+    console.log("Unpausing");
+    stopped = false; 
+    renderer.domElement.style.pointerEvents = 'auto';
+    animate();
+  } else {
+    console.log("Pausing");
+    stopped = true; 
+    renderer.domElement.style.pointerEvents = 'auto';
+  }
+  
 }
 
 // ----------------------------------------------------------------------

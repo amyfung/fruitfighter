@@ -22,7 +22,17 @@ h1,
 #score,
 #highScore {
   font-family: "Gang of Three", Arial, Helvetica, sans-serif;
-  
+}
+
+#gameOverMsg, #retry, #pause {
+  position: absolute;
+  font-size: 2em;
+  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
+}
+
+#gameOver, #settings {
+  text-align: center;
+  vertical-align: middle;
 }
 
 #logo { 
@@ -58,12 +68,3 @@ h1,
   border: 1px #000000 solid;
 }
 
-#retry{
-  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
-}
-
-#gameOver {
-  text-align: center;
-  vertical-align: middle;
-  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
-}
