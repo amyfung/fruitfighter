@@ -3,11 +3,6 @@
   src: local("./go3v2.tff");
 }
 
-main {
-  background-image: url("./images/background.png");
-  z-index: 10000000000;
-}
-
 canvas {
   display: block;
   margin: auto;

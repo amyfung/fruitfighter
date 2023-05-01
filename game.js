@@ -521,7 +521,7 @@ function createRenderer() {
 
 function createCamera() {
   camera = new THREE.PerspectiveCamera(
-    110, // fov
+    80, // fov
     window.innerWidth / window.innerHeight, // aspect
     30, // near
     500 // far
