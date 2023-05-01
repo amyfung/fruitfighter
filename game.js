@@ -304,6 +304,10 @@ function getRandNum(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
+/**
+ * Sets a random position for a fruit object.
+ * @param {THREE.Object3D} fruit - The fruit object to set the position for.
+*/
 function setRandPos(fruit) {
   fruit.position = new THREE.Vector3();
   fruit.position.x = Math.random() * 16 - 4;
@@ -314,6 +318,10 @@ function setRandPos(fruit) {
   fruit.position = new THREE.Vector3(randX, -fruitParams.max / 2, randZ); */
 }
 
+/**
+ * Sets a random velocity for a fruit object.
+ * @param {THREE.Object3D} fruit - The fruit object to set the velocity for.
+ */
 function setRandVelocity(fruit) {
   fruit.velocity = new THREE.Vector3();
   fruit.velocity.x = (Math.random() - 0.5) * 0.2;
@@ -326,6 +334,11 @@ function setRandVelocity(fruit) {
   fruit.velocity = new THREE.Vector3(x, y, z); */
 }
 
+/**
+ * Resets the fruit by resetting its position, velocity, life span, and 
+ *  visibility.
+ * @param {THREE.Object3D} fruit - The fruit object to be reset.
+ */
 function resetFruit(fruit) {
   setRandPos(fruit);
   setRandVelocity(fruit);
@@ -334,6 +347,13 @@ function resetFruit(fruit) {
   return fruit;
 }
 
+/**
+ * Given a number, generates a fruit or bomb and pushes it to the fruits array.
+ * @param {THREE.Object3D[]} fruits - An array to store the generated fruit or bomb.
+ * @param {number} num - A number to determine the type of fruit or bomb to be generated.
+ * @param {number} radius - The radius of the fruit.
+ * @param {THREE.Material} material - The material to be applied to the fruit mesh.
+ */
 function addFruit(fruits, num, radius, material) {
   var fruit;
   switch (num) {
@@ -364,6 +384,10 @@ function addFruit(fruits, num, radius, material) {
   return fruit;
 }
 
+/**
+ * Generates fruits using the given textures.
+ * @param {Array} textures - An array of textures for the fruits.
+ */
 function generateFruits(textures) {
   const materials = makeMaterials(textures);
   fruits = [];
@@ -549,6 +573,10 @@ function endGame() {
   stopped = true;
 }
 
+/**
+ * Starts the game again by hiding game over components, resetting the fruit, 
+ * and animating without resetting the high score
+ */
 function retryGame() {
   console.log("Retrying");
   stopped = false;
