@@ -3,13 +3,17 @@
   src: local("./go3v2.tff");
 }
 
+main {
+  background-image: url("./images/background.png");
+  z-index: 10000000000;
+}
+
 canvas {
   display: block;
   margin: auto;
   height: 80%;
   width: 80%;
 }
-
 #scoreDisplay {
   position: absolute;
   font-size: 2em;
@@ -25,21 +29,25 @@ h1,
   text-align: 'center';
 }
 
-#gameOver {
-  top: 50%;
-  left: 50%;
-  right: 50%;
-  text-align: center;
-  vertical-align: middle;
-  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
-  pointer-events: auto; 
+#logo { 
+  width: auto;
+  height: auto;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  text-align:center;
+  
 }
 
-#hwk6-project-description {
-  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-size: small;
-  z-index: 100;
-}
+#logo img {
+  width: auto;
+  height: auto;
+  margin: auto;
+  display:inline-block;
+} 
+
+
+
 
 .button {
   text-align: center;
@@ -62,5 +70,11 @@ h1,
 }
 
 #retry{
+  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
+}
+
+#gameOver {
+  text-align: center;
+  vertical-align: middle;
   font-family: "Gang of Three", Arial, Helvetica, sans-serif;
 }

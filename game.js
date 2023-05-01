@@ -1,10 +1,3 @@
-/**
- * Amy Fung and Lana Abdi
- * CS307 - Graphics
- * HW6: Creative Scene
- */
-//import { ExplodeModifier } from "./ExplodeModifier.js";
-
 let fruitParams, scene, camera, renderer, fruits, container, raycaster, mouse, score,
   highScore, isMouseDown, particleMaterial;
 let stopped = false;
@@ -359,17 +352,11 @@ function onMouseDown(event) {
   isMouseDown = true;
 }
 
-/**
- * Handles the mouse move event, updates the mouse coordinates, and checks if 
- * a fruit is sliced.
- * @param {Event} event - The mouse move event.
- */
 function onMouseMove(event) {
   event.preventDefault();
   if (!event.target == renderer.domElement) {
     return;
   }
-
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -393,23 +380,24 @@ function checkFruitSlicing() {
     // Remove fruit and update score
     if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
       if (fruit.name == "bomb") {
-        createExplosion(fruit);
+        //createExplosion(fruit);
         endGame();
         return; // Score is not incremented if a bomb is sliced
       }
       if (fruit.name == "fruit") {
         fruit.visible = false;
-        createExplosion(fruit);
+        //createExplosion(fruit);
         score++;
         updateScoreText();
         // Delay fruit respawn
         setTimeout(() => {
           resetFruit(fruit);
-        }, 1000);
+        }, 800);
       }
     }
   }
 }
+
 function createExplosion(fruit) {
   const explosion = new THREE.Object3D();
   const geometry = new THREE.SphereGeometry(.5, 32, 32); // Increased size
@@ -432,11 +420,9 @@ function createExplosion(fruit) {
       container.remove(explosion);
     }
   }
-
   // Animate and remove explosion particles
-  
+ 
 }
-
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
