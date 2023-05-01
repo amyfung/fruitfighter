@@ -619,16 +619,38 @@ function createLighting(scene) {
   scene.add(pointLight);
 }
 
-var level2Light = new THREE.SpotLight(new THREE.Color('grey'),2,0,Math.PI/4);level2Light.position.set(-40,10,-40)level2Light.target.position.set(-40,40,-40)scene.add(level2Light.target);scene.add(level2Light);
-var level3Light = new THREE.SpotLight(new THREE.Color('grey'),4,0,Math.PI/4);level3Light.position.set(-40,10,-40)level3Light.target.position.set(-40,40,-40)scene.add(level3Light.target);scene.add(level3Light);///var lightParams = { level1:true, level2:true, level3:true}
-function level1V() {
-//.visible = lightParams.level1;TW.render();}
+var level2Light = new THREE.SpotLight(new THREE.Color('grey'),2,0,Math.PI/4);
+level2Light.position.set(-40,10,-40)
+level2Light.target.position.set(-40,40,-40)
+scene.add(level2Light.target);
+scene.add(level2Light);
+
+var level3Light = new THREE.SpotLight(new THREE.Color('grey'),4,0,Math.PI/4);
+level3Light.position.set(-40,10,-40)
+level3Light.target.position.set(-40,40,-40)
+scene.add(level3Light.target);scene.add(level3Light);
+
+var lightParams = { level1:true, level2:true, level3:true}
+
+//function level1V() {.visible = lightParams.level1;
+//TW.render();}
 function level2V() {
-level2Light.visible = lightParams.level2;TW.render();}
+level2Light.visible = lightParams.level2;
+  TW.render();
+}
+
+
 function level3V() {
-level3Light.visible = lightParams.level3;TW.render();}
-// Render scenevar renderer = new THREE.WebGLRenderer();
+level3Light.visible = lightParams.level3;
+  TW.render();
+}
+// Render scene
+
+var renderer = new THREE.WebGLRenderer();
 TW.mainInit(renderer,scene);
 //TW.cameraSetup
 
-var gui = new dat.GUI();gui.add(lightParams, 'level1').onChange(level3V);gui.add(lightParams, 'level2').onChange(level2V);gui.add(lightParams, 'level3').onChange(level3V);
+var gui = new dat.GUI();
+  gui.add(lightParams, 'level1').onChange(level3V);
+  gui.add(lightParams, 'level2').onChange(level2V);
+  gui.add(lightParams, 'level3').onChange(level3V);
