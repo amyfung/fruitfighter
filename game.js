@@ -551,10 +551,18 @@ var level3Light = new THREE.SpotLight(new THREE.Color('grey'),4,0,Math.PI/4);lev
 function level1V() {
 //.visible = lightParams.level1;TW.render();}
 function level2V() {
-level2Light.visible = lightParams.level2;TW.render();}
+level2Light.visible = lightParams.level2;
+  TW.render();
+}
+
+
 function level3V() {
-level3Light.visible = lightParams.level3;TW.render();}
-// Render scenevar renderer = new THREE.WebGLRenderer();
+level3Light.visible = lightParams.level3;
+  TW.render();
+}
+// Render scene
+
+var renderer = new THREE.WebGLRenderer();
 TW.mainInit(renderer,scene);
 //TW.cameraSetup
 
