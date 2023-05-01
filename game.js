@@ -15,7 +15,7 @@ function init() {
     radius: 4,
     fruitCount: 5,
     max: 4,
-  }
+  };
 
   // Create scene and container
   scene = createScene();
@@ -241,24 +241,34 @@ function getRandNum(min, max) {
 }
 
 function setRandPos(fruit) {
-  var randX = getRandNum(-fruitParams.max / 2 * camera.aspect, fruitParams.max * camera.aspect);
+  fruit.position = new THREE.Vector3();
+  fruit.position.x = Math.random() * 18 - 2;
+  fruit.position.y = -3; // Change the initial y position to be below the screen
+  fruit.position.z = Math.random() * 10 - 5;
+  /* var randX = getRandNum(-camera.aspect, fruitParams.max * camera.aspect);
   var randZ = getRandNum(0, fruitParams.max);
-  fruit.position = new THREE.Vector3(randX, -fruitParams.max / 2, randZ);
+  fruit.position = new THREE.Vector3(randX, -fruitParams.max / 2, randZ); */
 }
 
 function setRandVelocity(fruit) {
+  fruit.velocity = new THREE.Vector3();
+  fruit.velocity.x = (Math.random() - 0.5) * 0.2;
+  fruit.velocity.y = Math.random() * 0.8 + 0.3; // Launch the fruit upwards
+  fruit.velocity.z = (Math.random() - 0.5) * 0.2;
   // numbers based on desired speed, position, and scene parameters
-  var x = getRandNum(-.1, .5);
-  var y = getRandNum(.5, .8);
+  /* var x = getRandNum(-.1, .5);
+  var y = getRandNum(.3, 1);
   var z = getRandNum(-.1, .3);
-  fruit.velocity = new THREE.Vector3(x, y, z);
+  fruit.velocity = new THREE.Vector3(x, y, z); */
 }
 
 function resetFruit(fruit) {
+  
   setRandPos(fruit);
   setRandVelocity(fruit);
   fruit.lifeSpan = 0;
   fruit.visible = true;
+  return fruit;
 }
 
 function addFruit(fruits, num, radius, material) {
@@ -279,7 +289,7 @@ function addFruit(fruits, num, radius, material) {
     case 4:
       fruit = createBanana(radius / 2, material);
       break;
-    case 5: 
+    case 5:
       fruit = createBomb(radius * .75);
       break;
   }
@@ -300,6 +310,7 @@ function generateFruits(textures) {
     } if (i == materials.length) {
       addFruit(fruits, i, fruitParams.radius, null) // Bomb does not use a texture
     }
+    //resetFruit(fruits[i]);
   }
 }
 
@@ -309,22 +320,27 @@ function animate() {
   }
 
   // Update fruit positions
+  // Generate number to select a fruit or bomb randomly
   for (let i = 0; i < fruitParams.fruitCount; i++) {
-    // Generate number to select a fruit or bomb randomly
     var num = getRandNum(0, fruits.length - 1);
     var fruit = fruits[num];
     fruit.position.add(fruit.velocity);
-    fruit.velocity.y -= 0.01; // Apply gravity to the fruit's velocity
+    fruit.velocity.y -= 0.05; // Apply gravity to the fruit's velocity
     fruit.rotation.x += 0.02;
     fruit.rotation.y += 0.02;
-    container.add(fruit);
     fruit.lifeSpan++;
 
     // Reset fruit position and life span
-    if (fruit.lifeSpan > 200) {
-      resetFruit(fruit);
+    if (fruit.lifeSpan > 150) {
+      fruits[num] = resetFruit(fruit);
     }
   }
+  for (let fruit of fruits) {
+    if (fruit.visible) {
+      container.add(fruit);
+    }
+  }
+
   if (explosionParticles) {
     for (let i = 0; i < explosionParticles.children.length; i++) {
       const particle = explosionParticles.children[i];
@@ -333,7 +349,7 @@ function animate() {
         particle.velocity.y -= 0.05;
         particle.scale.multiplyScalar(0.9);
         particle.lifeSpan++;
-        if (particle.lifeSpan > 40) { // Adjust the number to control the life span of particles
+        if (particle.lifeSpan > 30) { // Adjust the number to control the life span of particles
           particle.visible = false;
         }
       }
@@ -345,6 +361,7 @@ function animate() {
 
 
 function explodeFruit(fruit) {
+  container.remove(explosionParticles);
   createExplosionParticles();
   for (let i = 0; i < explosionParticles.children.length; i++) {
     const particle = explosionParticles.children[i];
@@ -352,9 +369,9 @@ function explodeFruit(fruit) {
     particle.visible = true;
 
     const velocity = new THREE.Vector3(
-      fruit.velocity.x * getRandNum(-3, 3),
-      fruit.velocity.y * getRandNum(-3, -.01),
-      fruit.velocity.z * getRandNum(-3, 3)
+      fruit.velocity.x * getRandNum(-5, 5),
+      fruit.velocity.y * (Math.random() * 3 + 1),
+      fruit.velocity.z * getRandNum(-5, 5)
     );
     particle.velocity = velocity;
   }
@@ -410,7 +427,7 @@ function checkFruitSlicing() {
         // Delay fruit respawn
         setTimeout(() => {
           resetFruit(fruit);
-        }, 800);
+        }, 700);
       }
     }
   }
