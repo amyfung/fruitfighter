@@ -140,12 +140,6 @@ function createApple(radius, material) {
   return apple;
 }
 
-/**
- * Given a texture material, creates a parent object and a banana mesh and adds
- * the mesh to the parent object before returning it.
- * @param {THREE.Material} material - The material to be applied to the banana
- * @returns {THREE.Object3D} A banana object.
- */
 function createBanana(material) {
   var bananafruitParams = {
     'ctrlPt0 x': -14,
@@ -235,7 +229,8 @@ function createExplosionParticles() {
     explosionParticles.add(particle);
     particle.visible = false;
   }
-  container.add(explosionParticles);
+  explosionParticles.lifeSpan = 0;
+  //container.add(explosionParticles);
 }
 
 // ----------------------------------------------------------------------
@@ -336,12 +331,14 @@ function animate() {
       if (particle.visible) {
         particle.position.add(particle.velocity);
         particle.velocity.y -= 0.05;
-        particle.scale.multiplyScalar(0.95);
-        if (particle.scale.x < 0.01) {
+        particle.scale.multiplyScalar(0.9);
+        particle.lifeSpan++;
+        if (particle.lifeSpan > 40) { // Adjust the number to control the life span of particles
           particle.visible = false;
         }
       }
     }
+    container.add(explosionParticles);
   }
   renderer.render(scene, camera);
 }
@@ -355,9 +352,9 @@ function explodeFruit(fruit) {
     particle.visible = true;
 
     const velocity = new THREE.Vector3(
-      fruit.velocity.x * (Math.random() * 2 - 1) * 3,
-      fruit.velocity.y * (Math.random() * 3 + 1),
-      fruit.velocity.z * (Math.random() * 2 - 1) * 3
+      fruit.velocity.x * getRandNum(-3, 3),
+      fruit.velocity.y * getRandNum(-3, -.01),
+      fruit.velocity.z * getRandNum(-3, 3)
     );
     particle.velocity = velocity;
   }
@@ -400,12 +397,13 @@ function checkFruitSlicing() {
     const fruit = object.parent; // Get the parent of the intersected object
     // Remove fruit and update score
     if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
-      explodeFruit(fruit);
       if (fruit.name == "bomb") {
+        explodeFruit(fruit);
         endGame();
         return; // Score is not incremented if a bomb is sliced
       }
       if (fruit.name == "fruit") {
+        explodeFruit(fruit);
         fruit.visible = false;
         score++;
         updateScoreText();
