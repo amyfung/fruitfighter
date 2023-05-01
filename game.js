@@ -1,6 +1,10 @@
+/**
+ * Amy Fung and Lana Abdi
+ * CS307 - Graphics
+ * HW6: Creative Scene
+ */
 let fruitParams, scene, camera, renderer, fruits, container, raycaster, mouse, score,
-  highScore, isMouseDown;
-let explosionParticles;
+  highScore, isMouseDown, explosionParticles;
 let stopped = false;
 
 // Initialize game
@@ -80,7 +84,13 @@ function loadTextures(callback) {
     });
 }
 
-
+/**
+ * For each texture given, sets properties for the texture, creates a material
+ * mapped to that texture, and adds the material to an array that
+ * it returns.
+ * @param {THREE.Texture[]} textures - The array of textures to create materials from.
+ * @returns {THREE.MeshPhongMaterial[]} The array of materials.
+ */
 function makeMaterials(textures) {
   var materials = [];
   for (var i = 0; i < textures.length; i++) {
@@ -97,6 +107,14 @@ function makeMaterials(textures) {
   return materials;
 }
 
+/**
+ * Given a radius dimension and texture material, creates a parent object
+ * and a watermelon mesh before scaling the mesh and adding it to the parent
+ * object.
+ * @param {number} radius - The radius of the watermelon.
+ * @param {THREE.Material} material - The material to be applied to the watermelon mesh.
+ * @returns {THREE.Object3D} A watermelon object.
+ */
 function createWatermelon(radius, material) {
   const watermelon = new THREE.Object3D();
   const watermelonGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -107,6 +125,15 @@ function createWatermelon(radius, material) {
   return watermelon;
 }
 
+/**
+ * Given a radius dimension and texture material, creates a parent object, an 
+ * orange mesh, and an orange stem mesh before adding both meshes to the parent
+ * object.
+ * @param {number} radius - The radius of the orange.
+ * @param {THREE.Material} material - The material to be applied to the 
+ *  orange mesh.
+ * @returns {THREE.Object3D} An orange object.
+ */
 function createOrange(radius, material) {
   const orange = new THREE.Object3D();
   const orangeGeometry = new THREE.SphereGeometry(radius, 40, 40);
@@ -123,7 +150,15 @@ function createOrange(radius, material) {
   return orange;
 }
 
-
+/**
+ * Given a radius dimension and texture material, creates a parent object, an 
+ * apple mesh, and an apple stem mesh before adding both meshes to the parent
+ * object.
+ * @param {number} radius - The radius of the apple.
+ * @param {THREE.Material} material - The material to be applied to the apple 
+ *  mesh.
+ * @returns {THREE.Object3D} An apple object.
+ */
 function createApple(radius, material) {
   const apple = new THREE.Object3D();
   const appleGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -140,6 +175,12 @@ function createApple(radius, material) {
   return apple;
 }
 
+/**
+ * Given a texture material, creates a parent object and a banana mesh and adds
+ * the mesh to the parent object before returning it.
+ * @param {THREE.Material} material - The material to be applied to the banana
+ * @returns {THREE.Object3D} A banana object.
+ */
 function createBanana(material) {
   var bananafruitParams = {
     'ctrlPt0 x': -14,
@@ -176,6 +217,14 @@ function createBanana(material) {
   return banana;
 }
 
+/**
+ * Given a radius dimension and texture material, creates a parent object and a
+ * kiwi mesh before scaling the mesh and adding it to the parent object.
+ * @param {number} radius - The radius of the kiwi.
+ * @param {THREE.Material} material - The material to be applied to the kiwi
+ *  mesh.
+ * @returns {THREE.Object3D} A kiwi object.
+ */
 function createKiwi(radius, material) {
   const kiwi = new THREE.Object3D();
   const kiwiGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -186,7 +235,13 @@ function createKiwi(radius, material) {
   return kiwi;
 }
 
-
+/**
+ * Given a radius dimension, creates a parent object, a bomb mesh, a bomb top
+ * mesh, and a detonating cord mesh before positioning the meshes and adding
+ * them to the parent object.
+ * @param {number} radius - The radius of the bomb body.
+ * @returns {THREE.Object3D} A bomb object.
+ */
 function createBomb(radius) {
   const bomb = new THREE.Object3D();
   const bombGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -239,6 +294,12 @@ function createExplosionParticles() {
 // ----------------------------------------------------------------------
 // Fruit animation
 // ----------------------------------------------------------------------
+/**
+ * Generates a random number between min and max (inclusive).
+ * @param {number} min - The minimum number.
+ * @param {number} max - The maximum number.
+ * @returns {number} A random number between min and max.
+ */
 function getRandNum(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
