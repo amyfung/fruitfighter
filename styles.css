@@ -11,8 +11,8 @@ main {
 canvas {
   display: block;
   margin: auto;
-  height: 80%;
-  width: 80%;
+  height: 70%;
+  width: 70%;
 }
 
 #scoreDisplay {
@@ -40,7 +40,7 @@ h1,
 #logo img {
   width: 40%;
   height: auto;
-  max-width: 300px;
+  max-width: 200px;
 } 
 
 .button {

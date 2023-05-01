@@ -217,10 +217,13 @@ function createBomb(radius) {
   return bomb;
 }
 
+var colors = [0xff9900, 0x9D00FF, 0x39FF14];
+
 function createExplosionParticles() {
   const particleCount = 500;
   const particleGeometry = new THREE.SphereGeometry(.5);
-  const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xff9900 });
+  var num = getRandNum(0, colors.length - 1)
+  const particleMaterial = new THREE.MeshBasicMaterial({ color: colors[num] });
 
   explosionParticles = new THREE.Group();
   for (let i = 0; i < particleCount; i++) {
@@ -242,9 +245,9 @@ function getRandNum(min, max) {
 
 function setRandPos(fruit) {
   fruit.position = new THREE.Vector3();
-  fruit.position.x = Math.random() * 18 - 2;
-  fruit.position.y = -3; // Change the initial y position to be below the screen
-  fruit.position.z = Math.random() * 10 - 5;
+  fruit.position.x = Math.random() * 16 - 4;
+  fruit.position.y = 0; // Change the initial y position to be below the screen
+  fruit.position.z = Math.random() * 6 - 3;
   /* var randX = getRandNum(-camera.aspect, fruitParams.max * camera.aspect);
   var randZ = getRandNum(0, fruitParams.max);
   fruit.position = new THREE.Vector3(randX, -fruitParams.max / 2, randZ); */
@@ -253,7 +256,7 @@ function setRandPos(fruit) {
 function setRandVelocity(fruit) {
   fruit.velocity = new THREE.Vector3();
   fruit.velocity.x = (Math.random() - 0.5) * 0.2;
-  fruit.velocity.y = Math.random() * 0.8 + 0.3; // Launch the fruit upwards
+  fruit.velocity.y = Math.random() * 1.5 + 0.5; // Launch the fruit upwards
   fruit.velocity.z = (Math.random() - 0.5) * 0.2;
   // numbers based on desired speed, position, and scene parameters
   /* var x = getRandNum(-.1, .5);
@@ -263,7 +266,6 @@ function setRandVelocity(fruit) {
 }
 
 function resetFruit(fruit) {
-  
   setRandPos(fruit);
   setRandVelocity(fruit);
   fruit.lifeSpan = 0;
@@ -369,9 +371,9 @@ function explodeFruit(fruit) {
     particle.visible = true;
 
     const velocity = new THREE.Vector3(
-      fruit.velocity.x * getRandNum(-5, 5),
-      fruit.velocity.y * (Math.random() * 3 + 1),
-      fruit.velocity.z * getRandNum(-5, 5)
+      getRandNum(-2,2),
+      getRandNum(-2,2),
+      getRandNum(-2,2)
     );
     particle.velocity = velocity;
   }
@@ -416,6 +418,8 @@ function checkFruitSlicing() {
     if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
       if (fruit.name == "bomb") {
         explodeFruit(fruit);
+        fruit.visible = false;
+        explosionParticles.visible = false;
         endGame();
         return; // Score is not incremented if a bomb is sliced
       }
@@ -517,10 +521,10 @@ function createRenderer() {
 
 function createCamera() {
   camera = new THREE.PerspectiveCamera(
-    75, // fov
+    110, // fov
     window.innerWidth / window.innerHeight, // aspect
-    .1, // near
-    1000 // far
+    30, // near
+    500 // far
   );
   console.log(camera.aspect);
   camera.position.set(0, 0, 50);
