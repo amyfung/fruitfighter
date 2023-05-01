@@ -3,8 +3,10 @@
  * CS307 - Graphics
  * HW6: Creative Scene
  */
+//import { ExplodeModifier } from "./ExplodeModifier.js";
+
 let fruitParams, scene, camera, renderer, fruits, container, raycaster, mouse, score,
-  highScore, isMouseDown;
+  highScore, isMouseDown, particleMaterial;
 let stopped = false;
 
 // Initialize game
@@ -33,6 +35,15 @@ function init() {
     animate();
   });
 
+  particleMaterial = new THREE.PointsMaterial({
+    size: 0.2,
+    color: 0xff9900,
+    transparent: true,
+    opacity: 0.7,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    map: new THREE.TextureLoader().load('./images/particles.png'),
+  });
   // Create camera
   createCamera();
 
@@ -63,11 +74,7 @@ function init() {
 // ----------------------------------------------------------------------
 // Fruit models
 // ----------------------------------------------------------------------
-/**
- * Loads the texture images and calls generateFruits and animate, provided as
- * a callback function.
- * @param {function} callback - A callback function.
- */
+
 function loadTextures(callback) {
   TW.loadTextures([
     // storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
@@ -112,14 +119,7 @@ function makeMaterials(textures) {
   return materials;
 }
 
-/**
- * Given a radius dimension and texture material, creates a parent object
- * and a watermelon mesh before scaling the mesh and adding it to the parent
- * object.
- * @param {number} radius - The radius of the watermelon.
- * @param {THREE.Material} material - The material to be applied to the watermelon mesh.
- * @returns {THREE.Object3D} A watermelon object.
- */
+
 function createWatermelon(radius, material) {
   const watermelon = new THREE.Object3D();
   const watermelonGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -130,15 +130,6 @@ function createWatermelon(radius, material) {
   return watermelon;
 }
 
-/**
- * Given a radius dimension and texture material, creates a parent object, an 
- * orange mesh, and an orange stem mesh before adding both meshes to the parent
- * object.
- * @param {number} radius - The radius of the orange.
- * @param {THREE.Material} material - The material to be applied to the 
- *  orange mesh.
- * @returns {THREE.Object3D} An orange object.
- */
 function createOrange(radius, material) {
   const orange = new THREE.Object3D();
   const orangeGeometry = new THREE.SphereGeometry(radius, 40, 40);
@@ -155,15 +146,7 @@ function createOrange(radius, material) {
   return orange;
 }
 
-/**
- * Given a radius dimension and texture material, creates a parent object, an 
- * apple mesh, and an apple stem mesh before adding both meshes to the parent
- * object.
- * @param {number} radius - The radius of the apple.
- * @param {THREE.Material} material - The material to be applied to the apple 
- *  mesh.
- * @returns {THREE.Object3D} An apple object.
- */
+
 function createApple(radius, material) {
   const apple = new THREE.Object3D();
   const appleGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -222,14 +205,6 @@ function createBanana(material) {
   return banana;
 }
 
-/**
- * Given a radius dimension and texture material, creates a parent object and a
- * kiwi mesh before scaling the mesh and adding it to the parent object.
- * @param {number} radius - The radius of the kiwi.
- * @param {THREE.Material} material - The material to be applied to the kiwi
- *  mesh.
- * @returns {THREE.Object3D} A kiwi object.
- */
 function createKiwi(radius, material) {
   const kiwi = new THREE.Object3D();
   const kiwiGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -240,13 +215,7 @@ function createKiwi(radius, material) {
   return kiwi;
 }
 
-/**
- * Given a radius dimension, creates a parent object, a bomb mesh, a bomb top
- * mesh, and a detonating cord mesh before positioning the meshes and adding
- * them to the parent object.
- * @param {number} radius - The radius of the bomb body.
- * @returns {THREE.Object3D} A bomb object.
- */
+
 function createBomb(radius) {
   const bomb = new THREE.Object3D();
   const bombGeom = new THREE.SphereGeometry(radius, 40, 40);
@@ -280,43 +249,24 @@ function createBomb(radius) {
 // ----------------------------------------------------------------------
 // Fruit animation
 // ----------------------------------------------------------------------
-/**
- * Generates a random number between min and max (inclusive).
- * @param {number} min - The minimum number.
- * @param {number} max - The maximum number.
- * @returns {number} A random number between min and max.
- */
 function getRandNum(min, max) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
-/**
- * Set a random position for a fruit object.
- * @param {THREE.Object3D} fruit - The fruit object to set the position for.
-*/
 function setRandPos(fruit) {
   var randX = getRandNum(-fruitParams.max / 2 * camera.aspect, fruitParams.max * camera.aspect);
-  var randZ = getRandNum(-fruitParams.max / 2, fruitParams.max);
-  fruit.position = new THREE.Vector3(randX, -fruitParams.max, randZ);
+  var randZ = getRandNum(0, fruitParams.max);
+  fruit.position = new THREE.Vector3(randX, -fruitParams.max / 2, randZ);
 }
 
-/**
- * Set a random velocity for a fruit object.
- * @param {THREE.Object3D} fruit - The fruit object to set the velocity for.
- */
 function setRandVelocity(fruit) {
   // numbers based on desired speed, position, and scene parameters
   var x = getRandNum(-.1, .5);
-  var y = getRandNum(.5, .7);
+  var y = getRandNum(.5, .8);
   var z = getRandNum(-.1, .3);
   fruit.velocity = new THREE.Vector3(x, y, z);
 }
 
-/**
- * Resets the fruit by resetting its position, velocity, life span, and 
- *  visibility.
- * @param {THREE.Object3D} fruit - The fruit object to be reset.
- */
 function resetFruit(fruit) {
   setRandPos(fruit);
   setRandVelocity(fruit);
@@ -324,13 +274,6 @@ function resetFruit(fruit) {
   fruit.visible = true;
 }
 
-/**
- * Given a number, generates a fruit or bomb and pushe sit 
- * @param {THREE.Object3D[]} fruits - An array to store the generated fruit or bomb.
- * @param {number} num - A number to determine the type of fruit or bomb to be generated.
- * @param {number} radius - The radius of the fruit.
- * @param {THREE.Material} material - The material to be applied to the fruit mesh.
- */
 function addFruit(fruits, num, radius, material) {
   var fruit;
   switch (num) {
@@ -361,10 +304,6 @@ function addFruit(fruits, num, radius, material) {
   return fruit;
 }
 
-/**
- * Generates fruits using the given textures.
- * @param {Array} textures - An array of textures for the fruits.
- */
 function generateFruits(textures) {
   const materials = makeMaterials(textures);
   fruits = [];
@@ -391,7 +330,7 @@ function animate() {
     var num = getRandNum(0, fruits.length - 1);
     var fruit = fruits[num];
     fruit.position.add(fruit.velocity);
-    fruit.velocity.y -= 0.006; // Apply gravity to the fruit's velocity
+    fruit.velocity.y -= 0.01; // Apply gravity to the fruit's velocity
     fruit.rotation.x += 0.02;
     fruit.rotation.y += 0.02;
     container.add(fruit);
@@ -402,25 +341,19 @@ function animate() {
       resetFruit(fruit);
     }
   }
+  
   renderer.render(scene, camera);
 }
 
 // ----------------------------------------------------------------------
 // User interaction
 // ----------------------------------------------------------------------
-/**
- * Handles the mouse up event. Sets the isMouseDown flag to false.
- * @param {Event} event - The mouse up event.
- */
+
 function onMouseUp(event) {
   event.preventDefault();
   isMouseDown = false;
 }
 
-/**
- * Handles the mouse down event. Sets the isMouseDown flag to true.
- * @param {Event} event - The mouse down event.
- */
 function onMouseDown(event) {
   event.preventDefault();
   isMouseDown = true;
@@ -450,22 +383,23 @@ function onMouseMove(event) {
 function checkFruitSlicing() {
   if (stopped) return;
   raycaster.setFromCamera(mouse, camera);
-  raycaster.params.Points.threshold = 1;
+  //raycaster.params.Points.threshold = 1;
   // Add 'true' to enable recursive search for child objects
   const intersects = raycaster.intersectObjects(container.children, true);
 
   for (let i = 0; i < intersects.length; i++) {
     const object = intersects[i].object;
     const fruit = object.parent; // Get the parent of the intersected object
-
     // Remove fruit and update score
     if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
       if (fruit.name == "bomb") {
+        createExplosion(fruit);
         endGame();
         return; // Score is not incremented if a bomb is sliced
       }
       if (fruit.name == "fruit") {
         fruit.visible = false;
+        createExplosion(fruit);
         score++;
         updateScoreText();
         // Delay fruit respawn
@@ -476,10 +410,34 @@ function checkFruitSlicing() {
     }
   }
 }
+function createExplosion(fruit) {
+  const explosion = new THREE.Object3D();
+  const geometry = new THREE.SphereGeometry(.5, 32, 32); // Increased size
+  const material = new THREE.MeshBasicMaterial({ color: 0xff4500 }); // Changed color to make more noticeable
 
-/**
- * Resizes the camera and renderer when the window is resized.
- */
+  for (let i = 0; i < 200; i++) { // Increased the number of particles
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.velocity = fruit.velocity;
+    mesh.position.copy(fruit.position);
+    mesh.scale.multiplyScalar(Math.random() * .5); // Increased scale
+    mesh.lifetime = 0;
+    explosion.add(mesh);
+    container.add(explosion);
+    if (mesh.lifetime < 10) { // Decreased lifetime
+      mesh.lifetime++;
+      mesh.position.add(mesh.velocity);
+      mesh.scale.multiplyScalar(0.9); // Increased shrinking rate
+      requestAnimationFrame(animateExplosion);
+    } else {
+      container.remove(explosion);
+    }
+  }
+
+  // Animate and remove explosion particles
+  
+}
+
+
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -504,25 +462,15 @@ function addEventListeners() {
 // ----------------------------------------------------------------------
 // Game display
 // ----------------------------------------------------------------------
-/**
- * Updates the displayed score text.
- */
+
 function updateScoreText() {
   document.getElementById("score").innerHTML = `Score: ${score}`;
 }
 
-/**
- * Updates the high score text on the screen.
- */
 function updateHighScore() {
   document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
 }
 
-/**
- * Hides or shows the game over components based on the specified visibility.
- * @param {boolean} visible - Determines whether the game over message should be 
- *  visible or hidden
- */
 function showGameOver(visible) {
   const gameOverDiv = document.getElementById('gameOver');
   if (visible) {
@@ -534,10 +482,6 @@ function showGameOver(visible) {
   }
 }
 
-/**
- * Called when a bomb is sliced and updates the high score, displays the game
- * over components, and stops the game.
- */
 function endGame() {
   if (score > highScore) {
     highScore = score;
@@ -548,10 +492,6 @@ function endGame() {
   stopped = true;
 }
 
-/**
- * Starts the game again by hiding game over components, resetting the fruit, 
- * and animating without resetting the high score
- */
 function retryGame() {
   console.log("Retrying");
   stopped = false;
@@ -568,20 +508,13 @@ function retryGame() {
 // ----------------------------------------------------------------------
 // Scene Utils
 // ----------------------------------------------------------------------
-/**
- * Create a new THREE.Scene object with a white background color.
- * @returns {THREE.Scene} The new scene object.
- */
+
 function createScene() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("white");
   return scene;
 }
 
-/**
-* Creates a new THREE.WebGLRenderer object and adds it to the document body.
-* @returns {THREE.WebGLRenderer} The new renderer object.
-*/
 function createRenderer() {
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -590,9 +523,6 @@ function createRenderer() {
   return renderer;
 }
 
-/**
- * Creates a camera for the scene.
- */
 function createCamera() {
   camera = new THREE.PerspectiveCamera(
     75, // fov
@@ -606,10 +536,7 @@ function createCamera() {
   return camera;
 }
 
-/**
- * Creates and adds lighting to the scene.
- * @param {THREE.Scene} scene - The scene to which lighting is added.
- */
+
 function createLighting(scene) {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
@@ -619,7 +546,7 @@ function createLighting(scene) {
   scene.add(pointLight);
 }
 
-var level2Light = new THREE.SpotLight(new THREE.Color('grey'),2,0,Math.PI/4);level2Light.position.set(-40,10,-40)level2Light.target.position.set(-40,40,-40)scene.add(level2Light.target);scene.add(level2Light);
+/* var level2Light = new THREE.SpotLight(new THREE.Color('grey'),2,0,Math.PI/4);level2Light.position.set(-40,10,-40)level2Light.target.position.set(-40,40,-40)scene.add(level2Light.target);scene.add(level2Light);
 var level3Light = new THREE.SpotLight(new THREE.Color('grey'),4,0,Math.PI/4);level3Light.position.set(-40,10,-40)level3Light.target.position.set(-40,40,-40)scene.add(level3Light.target);scene.add(level3Light);///var lightParams = { level1:true, level2:true, level3:true}
 function level1V() {
 //.visible = lightParams.level1;TW.render();}
@@ -632,3 +559,4 @@ TW.mainInit(renderer,scene);
 //TW.cameraSetup
 
 var gui = new dat.GUI();gui.add(lightParams, 'level1').onChange(level3V);gui.add(lightParams, 'level2').onChange(level2V);gui.add(lightParams, 'level3').onChange(level3V);
+ */
