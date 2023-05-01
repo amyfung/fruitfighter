@@ -22,7 +22,6 @@ function init() {
   container = new THREE.Object3D();
   container.name = "container";
   scene.add(container);
-  createExplosionParticles();
   // Load textures and generate fruits
   loadTextures(() => {
     // Call animate() function after the fruits have been generated
@@ -97,7 +96,6 @@ function makeMaterials(textures) {
   }
   return materials;
 }
-
 
 function createWatermelon(radius, material) {
   const watermelon = new THREE.Object3D();
@@ -227,16 +225,17 @@ function createBomb(radius) {
 
 function createExplosionParticles() {
   const particleCount = 500;
-  const particleGeometry = new THREE.SphereGeometry(1);
+  const particleGeometry = new THREE.SphereGeometry(.5);
   const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xff9900 });
 
   explosionParticles = new THREE.Group();
   for (let i = 0; i < particleCount; i++) {
     const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+    particle.velocity = new THREE.Vector3();
     explosionParticles.add(particle);
     particle.visible = false;
   }
-  scene.add(explosionParticles);
+  container.add(explosionParticles);
 }
 
 // ----------------------------------------------------------------------
@@ -309,9 +308,6 @@ function generateFruits(textures) {
   }
 }
 
-/**
- * Animates the fruits in the scene by updating their positions and rotations.
- */
 function animate() {
   if (!stopped) {
     requestAnimationFrame(function () { animate() });
@@ -334,31 +330,35 @@ function animate() {
       resetFruit(fruit);
     }
   }
-  for (let i = 0; i < explosionParticles.children.length; i++) {
-    const particle = explosionParticles.children[i];
-    if (particle.visible) {
-      particle.position.add(particle.velocity);
-      particle.velocity.y -= 0.05;
-      particle.scale.multiplyScalar(0.95);
-      if (particle.scale.x < 0.01) {
-        particle.visible = false;
+  if (explosionParticles) {
+    for (let i = 0; i < explosionParticles.children.length; i++) {
+      const particle = explosionParticles.children[i];
+      if (particle.visible) {
+        particle.position.add(particle.velocity);
+        particle.velocity.y -= 0.05;
+        particle.scale.multiplyScalar(0.95);
+        if (particle.scale.x < 0.01) {
+          particle.visible = false;
+        }
       }
     }
   }
   renderer.render(scene, camera);
 }
 
+
 function explodeFruit(fruit) {
+  createExplosionParticles();
   for (let i = 0; i < explosionParticles.children.length; i++) {
     const particle = explosionParticles.children[i];
     particle.position.copy(fruit.position);
     particle.visible = true;
 
     const velocity = new THREE.Vector3(
-      (Math.random() - 0.5) * 3,
-      (Math.random() - 0.5) * 3,
-      (Math.random() - 0.5) * 3
-    ); 
+      fruit.velocity.x * (Math.random() * 2 - 1) * 3,
+      fruit.velocity.y * (Math.random() * 3 + 1),
+      fruit.velocity.z * (Math.random() * 2 - 1) * 3
+    );
     particle.velocity = velocity;
   }
 }
