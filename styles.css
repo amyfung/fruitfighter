@@ -18,6 +18,12 @@ canvas {
   top: 10px;
 }
 
+#settings {
+  position: absolute;
+  text-align: center;
+  vertical-align: middle;
+}
+
 h1,
 #score,
 #highScore {

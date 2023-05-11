@@ -210,8 +210,8 @@ function createBanana(material) {
   var radii = [bananafruitParams.radius0, bananafruitParams.radius1, bananafruitParams.radius2, bananafruitParams.radius3];
 
   var bananaGeom = new THREE.TubeRadialGeometry(bezierCurve, 32, radii, 16, false);
-  var bananaMat = new THREE.MeshNormalMaterial();
-  bananaMat.side = THREE.DoubleSide;
+  //var bananaMat = new THREE.MeshNormalMaterial();
+  //bananaMat.side = THREE.DoubleSide;
   var banana = new THREE.Mesh(bananaGeom, material);
 
   return banana;
@@ -602,14 +602,16 @@ function retryGame() {
 }
 
 function pauseGame() {
-  if (stopped) {
+  if (stopped) { // Unpause
     console.log("Unpausing");
     stopped = false; 
+    document.getElementById("pause").value = `Pause`;
     renderer.domElement.style.pointerEvents = 'auto';
     animate();
-  } else {
+  } else { // Pause
     console.log("Pausing");
     stopped = true; 
+    document.getElementById("pause").value = `Play`;
     renderer.domElement.style.pointerEvents = 'auto';
   }
   
@@ -656,10 +658,14 @@ function createLighting(scene) {
   scene.add(pointLight);
 }
 
-/* var level2Light = new THREE.SpotLight(new THREE.Color('grey'),2,0,Math.PI/4);level2Light.position.set(-40,10,-40)level2Light.target.position.set(-40,40,-40)scene.add(level2Light.target);scene.add(level2Light);
-var level3Light = new THREE.SpotLight(new THREE.Color('grey'),4,0,Math.PI/4);level3Light.position.set(-40,10,-40)level3Light.target.position.set(-40,40,-40)scene.add(level3Light.target);scene.add(level3Light);///var lightParams = { level1:true, level2:true, level3:true}
+var level2Light = new THREE.SpotLight(new THREE.Color('grey'),2,0,Math.PI/4);level2Light.position.set(-40,10,-40)
+level2Light.target.position.set(-40,40,-40)
+scene.add(level2Light.target);scene.add(level2Light);
+var level3Light = new THREE.SpotLight(new THREE.Color('grey'),4,0,Math.PI/4);level3Light.position.set(-40,10,-40)
+level3Light.target.position.set(-40,40,-40)
+scene.add(level3Light.target);scene.add(level3Light);///var lightParams = { level1:true, level2:true, level3:true}
 function level1V() {
-//.visible = lightParams.level1;TW.render();}
+  level1Light.visible = lightParams.level1;TW.render();}
 function level2V() {
 level2Light.visible = lightParams.level2;
   TW.render();
@@ -672,9 +678,10 @@ level3Light.visible = lightParams.level3;
 }
 // Render scene
 
-var renderer = new THREE.WebGLRenderer();
 TW.mainInit(renderer,scene);
 //TW.cameraSetup
 
-var gui = new dat.GUI();gui.add(lightParams, 'level1').onChange(level3V);gui.add(lightParams, 'level2').onChange(level2V);gui.add(lightParams, 'level3').onChange(level3V);
- */
+var gui = new dat.GUI();gui.add(lightParams, 'level1').onChange(level3V);
+gui.add(lightParams, 'level2').onChange(level2V);
+gui.add(lightParams, 'level3').onChange(level3V);
+
