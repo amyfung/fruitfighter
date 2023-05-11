@@ -75,6 +75,8 @@ function loadTextures(callback) {
     "./assets/images/kiwi.jpg",
     //https://seamless-pixels.blogspot.com/2012/01/seamless-banana-skin.html
     "./assets/images/banana.jpg"
+    //"./assets/images/celery.jpg"
+    //"./assets/images/pear.jpg"
   ],
     function (textures) {
       generateFruits(textures);
@@ -236,6 +238,65 @@ function createKiwi(radius, material) {
 }
 
 /**
+ * Given a radius dimension and texture material, creates a parent object
+ * and a celery mesh before scaling the mesh and adding it to the parent
+ * object.
+ * @param {number} radius - The radius of the celery.
+ * @param {THREE.Material} material - The material to be applied to the celery mesh.
+ * @returns {THREE.Object3D} A celery object.
+ */
+function createCelery(radius, material) {
+  const celery = new THREE.Object3D();
+  const celeryGeom = new THREE.SphereGeometry(2, 2, 14,7,1,true,0,4);
+  const celeryMesh = new THREE.Mesh(CeleryGeom, material);
+  //CeleryMesh.scale.set(1, 1.4, 1);
+  celery.add(celeryMesh);
+  return celery;
+}
+
+/**
+ * Given a texture material, creates a parent object and a pear mesh and adds
+ * the mesh to the parent object before returning it.
+ * @param {THREE.Material} material - The material to be applied to the pear
+ * @returns {THREE.Object3D} A pear object.
+ */
+function createPear(material) {
+  var pearParams = {
+    'ctrlPt0 x': -26,
+    'ctrlPt0 y': 14,
+    'ctrlPt0 z': 0,
+    'ctrlPt1 x': 25,
+    'ctrlPt1 y': 25,
+    'ctrlPt1 z': 10,
+    'ctrlPt2 x': 75,
+    'ctrlPt2 y': 1,
+    'ctrlPt2 z': -5,
+    'ctrlPt3 x': 80,
+    'ctrlPt3 y': -1,
+    'ctrlPt3 z': -11,
+    radius0: 0,
+    radius1: 10,
+    radius2: 20,
+    radius3: 0,
+  };
+  var bezierCurve = new THREE.CubicBezierCurve3(
+    new THREE.Vector3(bananafruitParams['ctrlPt0 x'], bananafruitParams['ctrlPt0 y'], bananafruitParams['ctrlPt0 z']),
+    new THREE.Vector3(bananafruitParams['ctrlPt1 x'], bananafruitParams['ctrlPt1 y'], bananafruitParams['ctrlPt1 z']),
+    new THREE.Vector3(bananafruitParams['ctrlPt2 x'], bananafruitParams['ctrlPt2 y'], bananafruitParams['ctrlPt2 z']),
+    new THREE.Vector3(bananafruitParams['ctrlPt3 x'], bananafruitParams['ctrlPt3 y'], bananafruitParams['ctrlPt3 z'])
+  );
+
+  var radii = [pearParams.radius0, pearParams.radius1, pearParams.radius2, pearParams.radius3];
+
+  var pearGeom = new THREE.TubeRadialGeometry(bezierCurve, 32, radii, 16, false);
+  var pearMat = new THREE.MeshNormalMaterial();
+  pearMat.side = THREE.DoubleSide;
+  var pear = new THREE.Mesh(pearGeom, material);
+
+  return pear;
+}
+
+/**
  * Given a radius dimension, creates a parent object, a bomb mesh, a bomb top
  * mesh, and a detonating cord mesh before positioning the meshes and adding
  * them to the parent object.
@@ -392,6 +453,12 @@ function addFruit(fruits, num, radius, material) {
       fruit = createBanana(radius / 2, material);
       break;
     case 5:
+      fruit = createCelery(radius, material);
+      break;
+    case 6:
+      fruit = createPear(radius, material);
+      break;        
+    case 7:
       fruit = createBomb(radius * .75);
       break;
   }
