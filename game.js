@@ -14,6 +14,9 @@
  * The game can be easily adjusted to allow for changes in the maximum numbers 
  * of fruit to have onscreen at once, fruit sizes, and fruit life spans.
  * 
+ * The functions to create the different fruit can also be taken and used 
+ * outside of the program; only a radius value and a material need to be provided
+ * for each function.
  */
 let fruitParams, scene, camera, renderer, fruits, container, raycaster, mouse, score,
   highScore, isMouseDown, explosionParticles, activeFruits;
@@ -30,7 +33,7 @@ function init() {
   // Can be changed accordingly
   fruitParams = {
     radius: 4,
-    fruitCount: 5, // Maximum number of fruit on screen at once
+    fruitCount: 2, // Maximum number of fruit on screen at once
     maxLifeSpan: 150, // Maximum amount of time a fruit can be active
   };
 
@@ -206,7 +209,7 @@ function createBanana(radius, material) {
   const banana = new THREE.Object3D();
   // Define the control points for a typical banana shape
   const curve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(7, 0, 0), // right
+    new THREE.Vector3(7, 0, 0), 
     new THREE.Vector3(1.5, 4, 0), 
     new THREE.Vector3(-1.5, 4, 0),
     new THREE.Vector3(-7, 0, 0)
@@ -215,8 +218,8 @@ function createBanana(radius, material) {
   // Make the radius increase and then decrease and calculate values based on
   // the radius.
   const radii = [.25, radius * 5 / 6, radius, radius, radius * 5 / 6, .25];
-  const tubeGeometry = new THREE.TubeRadialGeometry(curve, 20, radii, 20, false);
-  const bananaMesh = new THREE.Mesh(tubeGeometry, material);
+  const bananaGeom = new THREE.TubeRadialGeometry(curve, 20, radii, 20, false);
+  const bananaMesh = new THREE.Mesh(bananaGeom, material);
   banana.add(bananaMesh);
   return banana;
 }
@@ -539,7 +542,7 @@ function checkFruitSlicing() {
     const object = intersects[i].object;
     const fruit = object.parent; // Get the parent of the intersected object
     // Remove fruit and update score
-    if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
+    if (object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
       if (fruit.name == "bomb") {
         explodeFruit(fruit);
         activeFruits.splice(activeFruits.indexOf(fruit), 1);
@@ -614,6 +617,12 @@ function updateHighScore() {
   document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
 }
 
+/**
+ * Hides or shows the game over and pause components based on the specified 
+ * visibility.
+ * @param {boolean} visible - Determines whether the game over message should be 
+ *  visible or hidden
+ */
 function showGameOver(visible) {
   const gameOverDiv = document.getElementById('gameOver');
   const pauseDiv = document.getElementById('settings');
