@@ -247,7 +247,7 @@ function createKiwi(radius, material) {
  */
 function createCelery(material) {
   const celery = new THREE.Object3D();
-  const celeryGeom = new THREE.SphereGeometry(2, 2, 14,7,1,true,0,4);
+  const celeryGeom = new THREE.CylinderGeometry(2, 2, 14,7,1,true,0,4);
   const celeryMesh = new THREE.Mesh(celeryGeom, material);
   //CeleryMesh.scale.set(1, 1.4, 1);
   celery.add(celeryMesh);
