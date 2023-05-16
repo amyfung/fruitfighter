@@ -1,34 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>Fruit Ninja Description</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="apple-touch-icon" sizes="180x180" href="./favicon_io/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="./favicon_io/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="./favicon_io/favicon-16x16.png">
-    <link rel="manifest" href="./favicon_io/site.webmanifest">
-    <link rel="stylesheet" href="./styles.css">
-</head>
+    <title>Beautiful Responsive Page</title>
 
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .image-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: box-shadow .3s ease;
+        }
+
+        .image-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .image-card .description {
+            padding: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
 <body>
-    <div id="logo">
-        <img src="./images/fruitNinja.png" alt="logo" class="logo">
+    <header>
+        <h1>Fruit Ninja Description</h1>
+    </header>
+
+    <div class="container">
+        <h2>Image Gallery</h2>
+        <div class="image-grid" id="imageGrid">
+        </div>
     </div>
-    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r95.all.js">
-        "https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"
+
+    <script>
+        const images = [
+            { src: 'image1.jpg', description: 'Image 1 description' },
+            { src: 'image2.jpg', description: 'Image 2 description' },
+        ];
+
+        // Function to create an image card
+        function createImageCard(image) {
+            const card = document.createElement('div');
+            card.classList.add('image-card');
+            card.innerHTML = `
+                <img src="${image.src}" alt="${image.description}">
+                <div class="description">${image.description}</div>
+            `;
+            return card;
+        }
+
+        // Get the image grid
+        const imageGrid = document.getElementById('imageGrid');
+
+        // Add each image to the grid
+        for (const image of images) {
+            const card = createImageCard(image);
+            imageGrid.appendChild(card);
+        }
     </script>
-    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/tw-sp21.js">
-        "https://cs.wellesley.edu/~cs307/threejs/libs/tw-fa18.js"
-    </script>
-    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r95.js">
-        "https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r80.js"
-    </script>
-    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r95.js">
-        "https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r80.min.js"
-    </script>
-    <script src="https://cs.wellesley.edu/~cs307/lectures-s21/TubeGeometryNew.js"></script>
-    <script src="https://cs.wellesley.edu/~cs307/lectures-s21/TubeRadialGeometry.js"></script>
 </body>
 </html>
