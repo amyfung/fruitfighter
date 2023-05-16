@@ -73,10 +73,8 @@ function loadTextures(callback) {
     "./assets/images/apple.jpg",
     //https://stock.adobe.com/images/kiwi-fruit-peel-macro-texture/62101744
     "./assets/images/kiwi.jpg",
+    "./assets/images/banana.jpg",
     //https://seamless-pixels.blogspot.com/2012/01/seamless-banana-skin.html
-    "./assets/images/banana.jpg"
-    //"./assets/images/celery.jpg"
-    //"./assets/images/pear.jpg"
   ],
     function (textures) {
       generateFruits(textures);
@@ -183,41 +181,24 @@ function createApple(radius, material) {
  * @param {THREE.Material} material - The material to be applied to the banana
  * @returns {THREE.Object3D} A banana object.
  */
-function createBanana(material) {
-  var bananafruitParams = {
-    'ctrlPt0 x': -14,
-    'ctrlPt0 y': 14,
-    'ctrlPt0 z': 5,
-    'ctrlPt1 x': -18,
-    'ctrlPt1 y': 8,
-    'ctrlPt1 z': 10,
-    'ctrlPt2 x': 25,
-    'ctrlPt2 y': -14,
-    'ctrlPt2 z': -5,
-    'ctrlPt3 x': 31,
-    'ctrlPt3 y': 21,
-    'ctrlPt3 z': 2,
-    radius0: 0,
-    radius1: 3,
-    radius2: 5,
-    radius3: 1,
-  };
-  var bezierCurve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(bananafruitParams['ctrlPt0 x'], bananafruitParams['ctrlPt0 y'], bananafruitParams['ctrlPt0 z']),
-    new THREE.Vector3(bananafruitParams['ctrlPt1 x'], bananafruitParams['ctrlPt1 y'], bananafruitParams['ctrlPt1 z']),
-    new THREE.Vector3(bananafruitParams['ctrlPt2 x'], bananafruitParams['ctrlPt2 y'], bananafruitParams['ctrlPt2 z']),
-    new THREE.Vector3(bananafruitParams['ctrlPt3 x'], bananafruitParams['ctrlPt3 y'], bananafruitParams['ctrlPt3 z'])
+function createBanana(radius, material) {
+  // Define the control points for a typical banana shape
+  const curve = new THREE.CubicBezierCurve3(
+    new THREE.Vector3(7, 0, 0), // right
+    new THREE.Vector3(1.5, 4, 0), 
+    new THREE.Vector3(-1.5, 4, 0),
+    new THREE.Vector3(-7, 0, 0)
   );
 
-  var radii = [bananafruitParams.radius0, bananafruitParams.radius1, bananafruitParams.radius2, bananafruitParams.radius3];
+  var radii = [.25, 1.25, radius * .75, radius * .75, 1.25, .25];
+  const tubeGeometry = new THREE.TubeRadialGeometry(curve, 20, radii, 20, false);
 
-  var bananaGeom = new THREE.TubeRadialGeometry(bezierCurve, 32, radii, 16, false);
-  //var bananaMat = new THREE.MeshNormalMaterial();
-  //bananaMat.side = THREE.DoubleSide;
-  var banana = new THREE.Mesh(bananaGeom, material);
+  // Create a mesh from the geometry and the material
+  const banana = new THREE.Mesh(tubeGeometry, material);
 
   return banana;
 }
+
 
 /**
  * Given a radius dimension and texture material, creates a parent object and a
@@ -235,23 +216,6 @@ function createKiwi(radius, material) {
   kiwi.add(kiwiMesh);
 
   return kiwi;
-}
-
-/**
- * Given a radius dimension and texture material, creates a parent object
- * and a celery mesh before scaling the mesh and adding it to the parent
- * object.
- * @param {number} radius - The radius of the celery.
- * @param {THREE.Material} material - The material to be applied to the celery mesh.
- * @returns {THREE.Object3D} A celery object.
- */
-function createCelery(radius, material) {
-  const celery = new THREE.Object3D();
-  const celeryGeom = new THREE.SphereGeometry(2, 2, 14,7,1,true,0,4);
-  const celeryMesh = new THREE.Mesh(CeleryGeom, material);
-  //CeleryMesh.scale.set(1, 1.4, 1);
-  celery.add(celeryMesh);
-  return celery;
 }
 
 /**
@@ -280,10 +244,10 @@ function createPear(material) {
     radius3: 0,
   };
   var bezierCurve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(bananafruitParams['ctrlPt0 x'], bananafruitParams['ctrlPt0 y'], bananafruitParams['ctrlPt0 z']),
-    new THREE.Vector3(bananafruitParams['ctrlPt1 x'], bananafruitParams['ctrlPt1 y'], bananafruitParams['ctrlPt1 z']),
-    new THREE.Vector3(bananafruitParams['ctrlPt2 x'], bananafruitParams['ctrlPt2 y'], bananafruitParams['ctrlPt2 z']),
-    new THREE.Vector3(bananafruitParams['ctrlPt3 x'], bananafruitParams['ctrlPt3 y'], bananafruitParams['ctrlPt3 z'])
+    new THREE.Vector3(pearParams['ctrlPt0 x'], pearParams['ctrlPt0 y'], pearParams['ctrlPt0 z']),
+    new THREE.Vector3(pearParams['ctrlPt1 x'], pearParams['ctrlPt1 y'], pearParams['ctrlPt1 z']),
+    new THREE.Vector3(pearParams['ctrlPt2 x'], pearParams['ctrlPt2 y'], pearParams['ctrlPt2 z']),
+    new THREE.Vector3(pearParams['ctrlPt3 x'], pearParams['ctrlPt3 y'], pearParams['ctrlPt3 z'])
   );
 
   var radii = [pearParams.radius0, pearParams.radius1, pearParams.radius2, pearParams.radius3];
@@ -453,12 +417,6 @@ function addFruit(fruits, num, radius, material) {
       fruit = createBanana(radius / 2, material);
       break;
     case 5:
-      fruit = createCelery(radius, material);
-      break;
-    case 6:
-      fruit = createPear(radius, material);
-      break;        
-    case 7:
       fruit = createBomb(radius * .75);
       break;
   }
@@ -601,7 +559,8 @@ function onWindowResize() {
 function addEventListeners() {
   renderer.domElement.addEventListener('mousedown', onMouseDown, false);
   renderer.domElement.addEventListener('mouseup', onMouseUp, false);
-  renderer.domElement.addEventListener('resize', onWindowResize, false);
+  //renderer.domElement.addEventListener('resize', onWindowResize, false);
+  window.addEventListener('resize', onWindowResize, false);
   renderer.domElement.addEventListener('mousemove', onMouseMove, false);
 
   var el = document.getElementById("retry");
@@ -632,12 +591,13 @@ function updateHighScore() {
 
 function showGameOver(visible) {
   const gameOverDiv = document.getElementById('gameOver');
+  const pauseDiv = document.getElementById('settings');
   if (visible) {
-    console.log("Showing game over msg")
-    gameOverDiv.style.visibility = 'visible';
+    gameOverDiv.style.display = 'block'; 
+    pauseDiv.style.display = 'none'; // Hide the pause button when the game is over
   } else {
-    console.log("Hiding game over msg")
-    gameOverDiv.style.visibility = 'hidden';
+    gameOverDiv.style.display = 'none'; 
+    pauseDiv.style.display = 'block'; // Show the pause button when the game is not over
   }
 }
 
@@ -715,7 +675,6 @@ function createCamera() {
   return camera;
 }
 
-
 function createLighting(scene) {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
@@ -724,31 +683,3 @@ function createLighting(scene) {
   pointLight.position.set(25, 50, 25);
   scene.add(pointLight);
 }
-
-var level2Light = new THREE.SpotLight(new THREE.Color('grey'),2,0,Math.PI/4);level2Light.position.set(-40,10,-40)
-level2Light.target.position.set(-40,40,-40)
-scene.add(level2Light.target);scene.add(level2Light);
-var level3Light = new THREE.SpotLight(new THREE.Color('grey'),4,0,Math.PI/4);level3Light.position.set(-40,10,-40)
-level3Light.target.position.set(-40,40,-40)
-scene.add(level3Light.target);scene.add(level3Light);///var lightParams = { level1:true, level2:true, level3:true}
-function level1V() {
-  level1Light.visible = lightParams.level1;TW.render();}
-function level2V() {
-level2Light.visible = lightParams.level2;
-  TW.render();
-}
-
-
-function level3V() {
-level3Light.visible = lightParams.level3;
-  TW.render();
-}
-// Render scene
-
-TW.mainInit(renderer,scene);
-//TW.cameraSetup
-
-var gui = new dat.GUI();gui.add(lightParams, 'level1').onChange(level3V);
-gui.add(lightParams, 'level2').onChange(level2V);
-gui.add(lightParams, 'level3').onChange(level3V);
-
