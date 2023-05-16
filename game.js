@@ -2,9 +2,21 @@
  * Amy Fung and Lana Abdi
  * CS307 - Graphics
  * HW6: Creative Scene
+ * 
+ * This program creates a Fruit Ninja clone game, wherein users can earn points
+ * by swiping and thus slicing fruit. If the user slices a bomb, the game is 
+ * over, and they can retry in order to beat their high score. The game includes
+ * pausing functionality and uses hierarchical modeling, Bezier curves, lighting, 
+ * a camera, transparency, textures, user interaction, and animation: especially
+ * hierarchical modeling, Bezier curves, textures, user interaction, and 
+ * animation. 
+ * 
+ * The game can be easily adjusted to allow for changes in the maximum numbers 
+ * of fruit to have onscreen at once, fruit sizes, and fruit life spans.
+ * 
  */
 let fruitParams, scene, camera, renderer, fruits, container, raycaster, mouse, score,
-  highScore, isMouseDown, explosionParticles;
+  highScore, isMouseDown, explosionParticles, activeFruits;
 let stopped = false;
 
 // Initialize game
@@ -15,10 +27,11 @@ init();
  * and attaching event listeners.
  */
 function init() {
+  // Can be changed accordingly
   fruitParams = {
     radius: 4,
-    fruitCount: 5,
-    max: 4,
+    fruitCount: 5, // Maximum number of fruit on screen at once
+    maxLifeSpan: 150, // Maximum amount of time a fruit can be active
   };
 
   // Create scene and container
@@ -26,13 +39,18 @@ function init() {
   container = new THREE.Object3D();
   container.name = "container";
   scene.add(container);
+
   // Load textures and generate fruits
   loadTextures(() => {
     // Call animate() function after the fruits have been generated
     animate();
   });
 
-  // Create camera
+  // Initialize activeFruits, the fruits currently visible and available to be
+  // swiped
+  activeFruits = [];
+
+  // Create and add camera
   createCamera();
 
   // Initializing raycaster and mouse
@@ -52,9 +70,6 @@ function init() {
 
   renderer = createRenderer();
 
-  // Add controls
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
   // Add event listeners
   addEventListeners();
 }
@@ -63,18 +78,23 @@ function init() {
 // Fruit models
 // ----------------------------------------------------------------------
 
+/**
+ * Loads textures for various fruits from different sources. 
+ * Executes a callback function after the textures have been loaded and the fruits have been generated.
+ * @param {function} callback - The callback function to be executed after the textures are loaded and the fruits are generated.
+ */
 function loadTextures(callback) {
   TW.loadTextures([
     // storage.needpix.com/rsynced_images/citrus-fruit-skin-2523487_1280.jpg
     "./assets/images/orange.jpg",
     // https://thumbs.dreamstime.com/b/watermelon-skin-texture-close-up-watermelon-skin-texture-watermelon-rind-stripes-102872998.jpg
     "./assets/images/watermelon.jpg",
-    //https://stock.adobe.com/ie/images/close-up-photo-of-red-apple-background-apples-fruit-peel-texture-macro-view-beautiful-natural-wallpaper/428378061
+    // https://stock.adobe.com/ie/images/close-up-photo-of-red-apple-background-apples-fruit-peel-texture-macro-view-beautiful-natural-wallpaper/428378061
     "./assets/images/apple.jpg",
-    //https://stock.adobe.com/images/kiwi-fruit-peel-macro-texture/62101744
+    // https://stock.adobe.com/images/kiwi-fruit-peel-macro-texture/62101744
     "./assets/images/kiwi.jpg",
+    // https://media.istockphoto.com/id/1397948009/photo/banana-skin-close-up-background-of-ripe-banana-peel-texture-banana-macro-photo-tropical-fruit.jpg?s=612x612&w=0&k=20&c=T-hIrIe1TULCh935vq5N0a3LjvpgMSrPpNndVFoFmsE=
     "./assets/images/banana.jpg",
-    //https://seamless-pixels.blogspot.com/2012/01/seamless-banana-skin.html
   ],
     function (textures) {
       generateFruits(textures);
@@ -178,10 +198,12 @@ function createApple(radius, material) {
 /**
  * Given a texture material, creates a parent object and a banana mesh and adds
  * the mesh to the parent object before returning it.
+ * @param {number} radius - The radius of the banana at its widest point.
  * @param {THREE.Material} material - The material to be applied to the banana
  * @returns {THREE.Object3D} A banana object.
  */
 function createBanana(radius, material) {
+  const banana = new THREE.Object3D();
   // Define the control points for a typical banana shape
   const curve = new THREE.CubicBezierCurve3(
     new THREE.Vector3(7, 0, 0), // right
@@ -190,12 +212,12 @@ function createBanana(radius, material) {
     new THREE.Vector3(-7, 0, 0)
   );
 
-  var radii = [.25, 1.25, radius * .75, radius * .75, 1.25, .25];
+  // Make the radius increase and then decrease and calculate values based on
+  // the radius.
+  const radii = [.25, radius * 5 / 6, radius, radius, radius * 5 / 6, .25];
   const tubeGeometry = new THREE.TubeRadialGeometry(curve, 20, radii, 20, false);
-
-  // Create a mesh from the geometry and the material
-  const banana = new THREE.Mesh(tubeGeometry, material);
-
+  const bananaMesh = new THREE.Mesh(tubeGeometry, material);
+  banana.add(bananaMesh);
   return banana;
 }
 
@@ -216,48 +238,6 @@ function createKiwi(radius, material) {
   kiwi.add(kiwiMesh);
 
   return kiwi;
-}
-
-/**
- * Given a texture material, creates a parent object and a pear mesh and adds
- * the mesh to the parent object before returning it.
- * @param {THREE.Material} material - The material to be applied to the pear
- * @returns {THREE.Object3D} A pear object.
- */
-function createPear(material) {
-  var pearParams = {
-    'ctrlPt0 x': -26,
-    'ctrlPt0 y': 14,
-    'ctrlPt0 z': 0,
-    'ctrlPt1 x': 25,
-    'ctrlPt1 y': 25,
-    'ctrlPt1 z': 10,
-    'ctrlPt2 x': 75,
-    'ctrlPt2 y': 1,
-    'ctrlPt2 z': -5,
-    'ctrlPt3 x': 80,
-    'ctrlPt3 y': -1,
-    'ctrlPt3 z': -11,
-    radius0: 0,
-    radius1: 10,
-    radius2: 20,
-    radius3: 0,
-  };
-  var bezierCurve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(pearParams['ctrlPt0 x'], pearParams['ctrlPt0 y'], pearParams['ctrlPt0 z']),
-    new THREE.Vector3(pearParams['ctrlPt1 x'], pearParams['ctrlPt1 y'], pearParams['ctrlPt1 z']),
-    new THREE.Vector3(pearParams['ctrlPt2 x'], pearParams['ctrlPt2 y'], pearParams['ctrlPt2 z']),
-    new THREE.Vector3(pearParams['ctrlPt3 x'], pearParams['ctrlPt3 y'], pearParams['ctrlPt3 z'])
-  );
-
-  var radii = [pearParams.radius0, pearParams.radius1, pearParams.radius2, pearParams.radius3];
-
-  var pearGeom = new THREE.TubeRadialGeometry(bezierCurve, 32, radii, 16, false);
-  var pearMat = new THREE.MeshNormalMaterial();
-  pearMat.side = THREE.DoubleSide;
-  var pear = new THREE.Mesh(pearGeom, material);
-
-  return pear;
 }
 
 /**
@@ -302,12 +282,19 @@ function createBomb(radius) {
 // ----------------------------------------------------------------------
 var colors = [0xff9900, 0x9D00FF, 0x39FF14];
 
+/**
+ * Creates a group of explosion particles for explosion animations.
+ */
 function createExplosionParticles() {
   const particleCount = 500;
   const particleGeometry = new THREE.SphereGeometry(.5);
+  // Randomly select a color for the explosion animation
   var num = getRandNum(0, colors.length - 1)
-  const particleMaterial = new THREE.MeshBasicMaterial({ color: colors[num] });
+  const particleMaterial = new THREE.MeshPhongMaterial({ color: colors[num] ,
+                                                         transparent: true, 
+                                                         opacity: .8});
 
+  // Create a group of explosion particles
   explosionParticles = new THREE.Group();
   for (let i = 0; i < particleCount; i++) {
     const particle = new THREE.Mesh(particleGeometry, particleMaterial);
@@ -318,18 +305,25 @@ function createExplosionParticles() {
   explosionParticles.lifeSpan = 0;
 }
 
+/**
+ * Called when a fruit is sliced. Creates explosion particles, sets their position
+ * based on the position of the fruit that was sliced, and sets their velocity. 
+ * @param {THREE.Object3D} fruit - The fruit that was sliced
+ */
 function explodeFruit(fruit) {
   container.remove(explosionParticles);
   createExplosionParticles();
   for (let i = 0; i < explosionParticles.children.length; i++) {
     const particle = explosionParticles.children[i];
+    // Place the explosion animation where the sliced fruit was
     particle.position.copy(fruit.position);
     particle.visible = true;
 
+    // Generate a random velocity based on the fruit size
     const velocity = new THREE.Vector3(
-      getRandNum(-2,2),
-      getRandNum(-2,2),
-      getRandNum(-2,2)
+      getRandNum(-fruitParams.radius / 2, fruitParams.radius / 2),
+      getRandNum(-fruitParams.radius / 2, fruitParams.radius / 2),
+      getRandNum(-fruitParams.radius / 2, fruitParams.radius / 2),
     );
     particle.velocity = velocity;
   }
@@ -354,12 +348,10 @@ function getRandNum(min, max) {
 */
 function setRandPos(fruit) {
   fruit.position = new THREE.Vector3();
-  fruit.position.x = Math.random() * 16 - 4;
-  fruit.position.y = 0; // Change the initial y position to be below the screen
-  fruit.position.z = Math.random() * 6 - 3;
-  /* var randX = getRandNum(-camera.aspect, fruitParams.max * camera.aspect);
-  var randZ = getRandNum(0, fruitParams.max);
-  fruit.position = new THREE.Vector3(randX, -fruitParams.max / 2, randZ); */
+  // Numbers based on desired speed, position, and scene parameters
+  fruit.position.x = getRandNum(-4, 12);
+  fruit.position.y = 0; // Initially at the bottom of the screen and then launched upward
+  fruit.position.z = getRandNum(-3, 3);
 }
 
 /**
@@ -368,14 +360,11 @@ function setRandPos(fruit) {
  */
 function setRandVelocity(fruit) {
   fruit.velocity = new THREE.Vector3();
-  fruit.velocity.x = (Math.random() - 0.5) * 0.2;
-  fruit.velocity.y = Math.random() * 1.5 + 0.5; // Launch the fruit upwards
-  fruit.velocity.z = (Math.random() - 0.5) * 0.2;
-  // numbers based on desired speed, position, and scene parameters
-  /* var x = getRandNum(-.1, .5);
-  var y = getRandNum(.3, 1);
-  var z = getRandNum(-.1, .3);
-  fruit.velocity = new THREE.Vector3(x, y, z); */
+  // Main motion should be upward, so y-coordinate for velocity allowed most
+  // variation
+  fruit.velocity.x = getRandNum(0, .2);
+  fruit.velocity.y = getRandNum(.5, 2); // Launch the fruit upwards
+  fruit.velocity.z = getRandNum(0, .2);
 }
 
 /**
@@ -387,7 +376,6 @@ function resetFruit(fruit) {
   setRandPos(fruit);
   setRandVelocity(fruit);
   fruit.lifeSpan = 0;
-  fruit.visible = true;
   return fruit;
 }
 
@@ -414,7 +402,7 @@ function addFruit(fruits, num, radius, material) {
       fruit = createKiwi(radius / 2, material);
       break;
     case 4:
-      fruit = createBanana(radius / 2, material);
+      fruit = createBanana(radius * .375, material);
       break;
     case 5:
       fruit = createBomb(radius * .75);
@@ -441,34 +429,43 @@ function generateFruits(textures) {
     } if (i == materials.length) {
       addFruit(fruits, i, fruitParams.radius, null) // Bomb does not use a texture
     }
-    //resetFruit(fruits[i]);
   }
 }
 
+/**
+ * Animates the game by randomly selecting fruit to add to the container and
+ * adjusting the position and visibility of the active fruit. Also adjusts the 
+ * position, velocity, and visibility of the explosion particles.
+ */
 function animate() {
+  // If game is paused or over, does not continue animation.
   if (!stopped) {
-    requestAnimationFrame(function () { animate() });
+    requestAnimationFrame(animate);
   }
 
-  // Update fruit positions
-  // Generate number to select a fruit or bomb randomly
-  for (let i = 0; i < fruitParams.fruitCount; i++) {
-    var num = getRandNum(0, fruits.length - 1);
-    var fruit = fruits[num];
+  // Get a random set of fruits based on the fruit count parameter
+  while (activeFruits.length < fruitParams.fruitCount) {
+    let fruitIndex = getRandNum(0, fruits.length - 1);
+    activeFruits.push(fruits[fruitIndex]);
+  }
+
+  // Update positions and visibility of the active fruit
+  for (let i = 0; i < activeFruits.length; i++) {
+    let fruit = activeFruits[i];
     fruit.position.add(fruit.velocity);
     fruit.velocity.y -= 0.05; // Apply gravity to the fruit's velocity
     fruit.rotation.x += 0.02;
     fruit.rotation.y += 0.02;
+
+    // Add fruit to container and increase lifespan
+    container.add(fruit);
     fruit.lifeSpan++;
 
-    // Reset fruit position and life span
-    if (fruit.lifeSpan > 150) {
-      fruits[num] = resetFruit(fruit);
-    }
-  }
-  for (let fruit of fruits) {
-    if (fruit.visible) {
-      container.add(fruit);
+    // Reset fruit position and velocity and make inactive if maxLifeSpan exceeded.
+    if (fruit.lifeSpan > fruitParams.maxLifeSpan) {
+      container.remove(fruit);
+      resetFruit(fruit);
+      activeFruits.splice(activeFruits.indexOf(fruit), 1);
     }
   }
 
@@ -491,22 +488,32 @@ function animate() {
 }
 
 
-
-
 // ----------------------------------------------------------------------
 // User interaction
 // ----------------------------------------------------------------------
-
+/**
+ * Handles the mouse up event. Sets the isMouseDown flag to false.
+ * @param {Event} event - The mouse up event.
+ */
 function onMouseUp(event) {
   event.preventDefault();
   isMouseDown = false;
 }
 
+/**
+ * Handles the mouse down event. Sets the isMouseDown flag to true.
+ * @param {Event} event - The mouse down event.
+ */
 function onMouseDown(event) {
   event.preventDefault();
   isMouseDown = true;
 }
 
+/**
+ * Handles the mouse move event, updates the mouse coordinates, and checks if 
+ * a fruit is sliced.
+ * @param {Event} event - The mouse move event.
+ */
 function onMouseMove(event) {
   event.preventDefault();
   if (!event.target == renderer.domElement) {
@@ -518,6 +525,10 @@ function onMouseMove(event) {
   checkFruitSlicing();
 }
 
+/**
+ * Checks if any fruits have been sliced and updates their visibility and the 
+ * score if so.
+ */
 function checkFruitSlicing() {
   if (stopped) return;
   raycaster.setFromCamera(mouse, camera);
@@ -531,14 +542,18 @@ function checkFruitSlicing() {
     if (fruit.visible && object !== fruit) { // Check if the intersected object is not the parent (i.e. it's the mesh)
       if (fruit.name == "bomb") {
         explodeFruit(fruit);
-        fruit.visible = false;
+        activeFruits.splice(activeFruits.indexOf(fruit), 1);
+        container.remove(fruit);
         explosionParticles.visible = false;
         endGame();
         return; // Score is not incremented if a bomb is sliced
       }
       if (fruit.name == "fruit") {
         explodeFruit(fruit);
-        fruit.visible = false;
+        // Remove fruit from container and make inactive
+        activeFruits.splice(activeFruits.indexOf(fruit), 1);
+        container.remove(fruit);
+        // Increment score
         score++;
         updateScoreText();
         // Delay fruit respawn
@@ -550,16 +565,21 @@ function checkFruitSlicing() {
   }
 }
 
+/**
+ * Resizes the camera and renderer when the window is resized.
+ */
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+/**
+ * Adds listeners for mouse events and window resize events.
+ */
 function addEventListeners() {
   renderer.domElement.addEventListener('mousedown', onMouseDown, false);
   renderer.domElement.addEventListener('mouseup', onMouseUp, false);
-  //renderer.domElement.addEventListener('resize', onWindowResize, false);
   window.addEventListener('resize', onWindowResize, false);
   renderer.domElement.addEventListener('mousemove', onMouseMove, false);
 
@@ -575,16 +595,21 @@ function addEventListeners() {
     else if (pause.attachEvent)
       pause.attachEvent('onclick', pauseGame);
 }
+
 // ----------------------------------------------------------------------
 // Game display
 // ----------------------------------------------------------------------
+
 /**
- * 
+ * Updates the displayed score text.
  */
 function updateScoreText() {
   document.getElementById("score").innerHTML = `Score: ${score}`;
 }
 
+/**
+ * Updates the high score text on the screen.
+ */
 function updateHighScore() {
   document.getElementById("highScore").innerHTML = `High Score: ${highScore}`;
 }
@@ -601,6 +626,10 @@ function showGameOver(visible) {
   }
 }
 
+/**
+ * Called when a bomb is sliced and updates the high score, displays the game
+ * over components, and stops the game.
+ */
 function endGame() {
   if (score > highScore) {
     highScore = score;
@@ -628,6 +657,10 @@ function retryGame() {
   animate();
 }
 
+/**
+ * Pauses or unpauses the game based on the current state. Adjusts the pause
+ * button accordingly.
+ */
 function pauseGame() {
   if (stopped) { // Unpause
     console.log("Unpausing");
@@ -641,19 +674,27 @@ function pauseGame() {
     document.getElementById("pause").value = `Play`;
     renderer.domElement.style.pointerEvents = 'auto';
   }
-  
 }
 
 // ----------------------------------------------------------------------
 // Scene Utils
 // ----------------------------------------------------------------------
 
+/**
+ * Creates and returns a THREE.Scene.
+ * @returns scene - The created THREE.Scene.
+ */
 function createScene() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("white");
   return scene;
 }
 
+/**
+ * Creates a new THREE.WebGLRenderer and sets it parameters based on those
+ * of the window.
+ * @returns renderer - The renderer
+ */
 function createRenderer() {
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -662,6 +703,9 @@ function createRenderer() {
   return renderer;
 }
 
+/**
+ * Creates a camera and adds it to the container.
+ */
 function createCamera() {
   camera = new THREE.PerspectiveCamera(
     80, // fov
@@ -669,17 +713,20 @@ function createCamera() {
     30, // near
     500 // far
   );
-  console.log(camera.aspect);
   camera.position.set(0, 0, 50);
-  scene.add(camera);
-  return camera;
+  container.add(camera);
 }
 
+/**
+ * Creates and adds lighting to the given scene.
+ * @param {THREE.Scene} scene - The scene to which the lighting is added
+ */
 function createLighting(scene) {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
 
-  const pointLight = new THREE.PointLight(0xffffff, .5);
+  const pointLight = new THREE.PointLight(0xffffff, 0.5);
+  // Based on the position of the camera
   pointLight.position.set(25, 50, 25);
   scene.add(pointLight);
 }

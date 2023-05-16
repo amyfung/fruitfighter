@@ -40,13 +40,14 @@ h1,
 
 #gameOverMsg {
   margin-bottom: 20px;
-}
-
-#retry, #pause, #gameOverMsg {
   font-size: 3em;
   font-family: "Gang of Three", Arial, Helvetica, sans-serif;
 }
 
+#retry, #pause {
+  font-size: 1em;
+  font-family: "Gang of Three", Arial, Helvetica, sans-serif;
+}
 
 #logo { 
   width: 100%;
