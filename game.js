@@ -245,10 +245,10 @@ function createKiwi(radius, material) {
  * @param {THREE.Material} material - The material to be applied to the celery mesh.
  * @returns {THREE.Object3D} A celery object.
  */
-function createCelery(radius, material) {
+function createCelery(material) {
   const celery = new THREE.Object3D();
   const celeryGeom = new THREE.SphereGeometry(2, 2, 14,7,1,true,0,4);
-  const celeryMesh = new THREE.Mesh(CeleryGeom, material);
+  const celeryMesh = new THREE.Mesh(celeryGeom, material);
   //CeleryMesh.scale.set(1, 1.4, 1);
   celery.add(celeryMesh);
   return celery;
